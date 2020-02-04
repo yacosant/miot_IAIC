@@ -34,6 +34,7 @@ def compara_tiempos():
     plt.scatter(sizes, times_dot, c='red', label='bucle') 
     plt.scatter(sizes, times_fast, c='blue', label='vector') 
     plt.legend() 
+    plt.show()
     plt.savefig('time.png') 
     print("Terminado!")
 

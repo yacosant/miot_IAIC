@@ -30,8 +30,15 @@ def pintaFun(fX,puntos):
     plt.show()
 
 def integra_mc(fun, a, b, num_puntos=10000):
+    
+    sizes = np.linspace(a,b, num_puntos) 
+   
+    for size in sizes: 
+        puntosX = np.random.randint(a, b, int(size)) #np.random.uniform(1, 100, int(size)) 
+       
+    
     #generar coordenadas X entre a y b
-    puntosX = np.random.randint(a,b,size=num_puntos)
+    #puntosX = np.random.randint(a,b,size=num_puntos)
     print(puntosX)
 
     #crea las Y de f(x)
@@ -41,9 +48,11 @@ def integra_mc(fun, a, b, num_puntos=10000):
     min = np.amin(puntosFx)
     max = np.amax(puntosFx)
     print("[INFO] Minimo: "+ str(min) + " / Maximo: "+str(max))
-
+    for size in sizes: 
+        puntosY = np.random.randint(min, max, int(size)) #same
+        
     #generar Y entre min y max
-    puntosY = np.random.randint(min,max,num_puntos)
+    #puntosY = np.random.randint(min,max,num_puntos)
 
     #devulve que puntos cumplen y<f(x)
     mask = (puntosY < puntosFx)
