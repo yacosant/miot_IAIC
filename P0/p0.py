@@ -13,30 +13,41 @@ la proporcion de puntos que caigan por debajo de la función será la proporcion
 
 import time 
 import numpy as np
+import sys
 import matplotlib.pyplot as plt
 
 def funcion (x):
     return x*2
 
+
 def integra_mc(fun, a, b, num_puntos=10000):
-    #matriz = numpy.random.randint(min_val,max_val,(<num_rows>,<num_cols>))
+    #generar coordenadas X entre a y b
+    puntosX = np.random.randint(a,b,num_puntos)
+    print(puntosX)
 
-    #recorrer la funcion entre a y b para sacar min y max
-    #generar puntos x entre a y b
-    #generar puntos y entre min y max
+    #crea las Y de f(x)
+    puntosFx = fun(puntosX)
 
-    #recorrer los num_puntos comprobando uno por uno si y<f(x)
+    #obtiene minimo y maximo de f(x)
+    min=np.amin(puntosFx)
+    max=np.amax(puntosFx)
+    print("[INFO] Minimo: "+ str(min) + " / Maximo: "+str(max))
 
-    for i in range(a, b):
-        print(i+"")
+    #generar Y entre min y max
+    puntosY = np.random.randint(min,max,num_puntos)
+
+    #devulve que puntos cumplen y<f(x)
+    
+
     return 0
 
 
 def main ():
     print("Start!")
+    np.set_printoptions(threshold=sys.maxsize)
     #integra_mc(funcion,0, 30)
     #matriz = np.random.randint(0,2,3,4(1,1))
-    print(matriz)
+    integra_mc(funcion, 1, 100, 10000)
     print("End!")
 
 
