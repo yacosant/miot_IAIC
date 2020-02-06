@@ -59,13 +59,16 @@ def integra_mc(fun, a, b, num_puntos=10000):
     min = 0 #np.amin(puntosFx)
     max = np.amax(puntosFx)
     print("[INFO] Minimo: "+ str(min) + " / Maximo: "+str(max))
+    
     """
     for size in sizes: 
         puntosY = np.random.randint(min, max, int(size)) #same
     """
-
+    tope= int(num_puntos/(b-a))
+    for i in range(0, tope):
+        puntosY = np.random.randint(min,max,99) #????
     #generar Y entre min y max
-    puntosY = np.random.randint(min,max,99)
+    #puntosY = np.random.randint(min,max,99)
 
     #devulve que puntos cumplen y<f(x)
     mask = (puntosY < puntosFx)
