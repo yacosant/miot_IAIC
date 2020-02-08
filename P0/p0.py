@@ -26,11 +26,11 @@ def funcion (x):
     return ((a * x) ** 2) + (b * x) + c
     #return x*2
 
-def pintaFun(puntosX, puntosFx, combined): 
+def pintaFun(puntosX, puntosFx, puntosY, combined, mask): 
     # Plot the data
-    print(puntosFx)
-    plt.plot(puntosX,puntosFx,  label='Función') 
-    plt.plot(combined, color='red',lw=0,marker='+',markersize=10)
+    #print(puntosFx)
+    plt.plot(puntosX, puntosY,  label='Función') 
+    plt.plot(puntosY, color='red',lw=0,marker='+',markersize=10)
     # Add a legend
     plt.legend()
 
@@ -38,7 +38,7 @@ def pintaFun(puntosX, puntosFx, combined):
     plt.show()
 
 def integra_mc(fun, a, b, num_puntos=10000):
-    
+    num_puntos=1000
     """
     sizes = np.linspace(a,b, num_puntos) 
    
@@ -48,30 +48,48 @@ def integra_mc(fun, a, b, num_puntos=10000):
     
     #generar coordenadas X entre a y b
     #puntosX = np.random.randint(a,b,size=num_puntos)
-    puntosX = np.arange(a, b, 1)
+    #puntosX = np.arange(a, b, 1)
+    puntosX = np.arange(a, b, 0.01)
     print(puntosX)
 
     #crea las Y de f(x)
-    puntosFx = fun(puntosX)
+    puntosFx = fun(puntosX) #y
 
     print(puntosFx)
     #obtiene minimo y maximo de f(x)
-    min = 0 #np.amin(puntosFx)
+    min = 0 
     max = np.amax(puntosFx)
     print("[INFO] Minimo: "+ str(min) + " / Maximo: "+str(max))
     
+    x_rand =  a + (b - a)*np.random.random_sample(num_puntos)
+    y_rand = np.random.random_sample(num_puntos)*max
+
+    ind_below = np.where(y_rand < fun(x_rand))
+    ind_above = np.where(y_rand >= fun(x_rand))
+
+    pts_below = plt.scatter(x_rand[ind_below], y_rand[ind_below], color = "green")
+    pts_above = plt.scatter(x_rand[ind_above], y_rand[ind_above], color = "blue")
+    plt.plot(puntosX, puntosFx, color = "red")
+    plt.show()
+
     """
     for size in sizes: 
         puntosY = np.random.randint(min, max, int(size)) #same
     """
+
+
+    """
     tope= int(num_puntos/(b-a))
-    for i in range(0, tope):
-        puntosY = np.random.randint(min,max,99) #????
+    #for i in range(0, tope):
+     #   puntosY = np.random.randint(min,max,99) #????
     #generar Y entre min y max
     #puntosY = np.random.randint(min,max,99)
 
+    puntosY = np.random.uniform(min, max, size=(2, num_puntos))
+
     #devulve que puntos cumplen y<f(x)
     mask = (puntosY < puntosFx)
+
     # para pintar los superiores distintos sup = (puntosY => puntosFx)
     nPuntosDebajo =  np.sum(mask)
     print("Numero de puntos por debajo: "+str(nPuntosDebajo)) 
@@ -80,8 +98,8 @@ def integra_mc(fun, a, b, num_puntos=10000):
     combined = np.vstack((puntosY, puntosX)).T
 
     #pinta puntos f(x)
-    pintaFun(puntosX, puntosFx, puntosY)
-
+    pintaFun(puntosX, puntosFx, puntosY, combined, mask)
+    """
     return 0
 
 
