@@ -50,12 +50,12 @@ def integra_mc(fun, a, b, num_puntos=10000):
     x =  a + (b - a)*np.random.random_sample(num_puntos)
     y = np.random.random_sample(num_puntos)*max
 
-    debajo = np.where(y < fun(x))
-    encima = np.where(y >= fun(x))
+    debajo = y < fun(x)#np.where(y < fun(x))
+    encima = y >= fun(x)#np.where(y >= fun(x))
     
     #Cuento cuantos puntos quedan por debajo de la funcion
     nDebajo =  np.sum(debajo)
-    nTotal =  np.sum(y)
+    nTotal =  np.sum(x)
     print("[INFO] Numero de puntos por debajo: "+str(nDebajo)) 
     print("[INFO] Numero de puntos total: "+str(nTotal)) 
 
@@ -106,5 +106,20 @@ def main ():
     
     print("End!")
 
+
+#main()
+
+
+x =  np.random.random_sample(10)
+y = np.random.random_sample(10)
+
+debajo = y< 2*x #np.where(y < x*2)
+print(x*2)
+print(y)
+print(debajo)
+print(len(x))
+print(len(debajo))
+
+print("----------")
 
 main()
