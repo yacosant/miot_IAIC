@@ -86,12 +86,7 @@ def integra_mc_mode(fun, a, b, mode, num_puntos=10000):
 
     return tiempo
 
-def compara_tiempos(): 
-    #definicion de variables
-    num_puntos=10000
-    a=100
-    b=1000
-    ########################
+def compara_tiempos(num_puntos,a,b): 
 
     sizes = np.linspace(a, num_puntos, 20) 
     times_dot = [] 
@@ -112,10 +107,16 @@ def compara_tiempos():
     plt.show()
 
 def main ():
+    #definicion de variables
+    num_puntos=10000
+    a=100
+    b=1000
+    ########################
+    
     print("[INICIO]")
     np.set_printoptions(threshold=sys.maxsize)
     
-    compara_tiempos()
+    compara_tiempos(num_puntos,a,b)
     print("------------------------------------------------ ")
     print("[INFO]: Puedes consultar las graficas generadas con ambos metodos en 'num_puntos-vectorizado.png' y en 'num_puntos-bucles.png'")
     print("[INFO]: Puedes consultar la graficas generada de comparcion de tiempos en 'times.png'")
