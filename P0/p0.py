@@ -6,6 +6,7 @@
 import time 
 import numpy as np
 import sys
+import scipy.integrate
 import matplotlib.pyplot as plt
 
 def funcion (x):
@@ -13,14 +14,13 @@ def funcion (x):
     b = 0
     c = 0
     return ((a * x) ** 2) + (b * x) + c
-    #return x*2
 
 def pintaFun(puntosX, puntosY, x, y, encima, debajo, mode, npuntos):
     dir='./result/'+str(npuntos) 
     plt.scatter(x[debajo], y[debajo], marker='+', color = "green")
     plt.scatter(x[encima], y[encima], marker='+',color = "grey")
     plt.plot(puntosX, puntosY, color = "blue")
-    #plt.show()
+
     if mode==0:
         plt.savefig(dir+'-vectorizado.png') 
     else: 
@@ -88,7 +88,7 @@ def integra_mc_mode(fun, a, b, mode, num_puntos=10000):
 
 def compara_tiempos(num_puntos,a,b): 
 
-    sizes = np.linspace(a, num_puntos, 20) 
+    sizes = np.linspace(100, num_puntos, 20) 
     times_dot = [] 
     times_fast = [] 
     times = []
@@ -117,6 +117,9 @@ def main ():
     np.set_printoptions(threshold=sys.maxsize)
     
     compara_tiempos(num_puntos,a,b)
+    i = scipy.integrate.quad(funcion, a, b)
+    print("------------------------------------------------ ")
+    print("El resultado obtenido con 'scipy.integrate.quad' es:"+ str(i))
     print("------------------------------------------------ ")
     print("[INFO]: Puedes consultar las graficas generadas con ambos metodos en 'num_puntos-vectorizado.png' y en 'num_puntos-bucles.png'")
     print("[INFO]: Puedes consultar la graficas generada de comparcion de tiempos en 'times.png'")
