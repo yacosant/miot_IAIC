@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 from pandas.io.parsers import read_csv
 import matplotlib.pyplot as plt
 
@@ -32,7 +33,7 @@ def gradiente(X, Y, Theta, alpha):
     return NuevaTheta
 
 def descenso_gradiente(X, Y, teta, alpha):
-
+    print("[descenso_gradiente] Teta in: "+str(teta))
     #m=10000
     m = np.shape(X)[0]
 
@@ -53,11 +54,13 @@ def descenso_gradiente(X, Y, teta, alpha):
     costes = coste(X,Y,teta)
     teta = gradiente(X,Y,teta,alpha)
     print("Coste: "+str(costes)+" - Teta: "+str(teta))
-
-    return[teta,costes]
-
+    print("[descenso_gradiente] Teta OUt: "+str(teta))
+    return teta,costes
 
 def main():
+    iteraciones = 15
+    fin = False
+
     datos = carga_csv('ex1data1.csv')
     X = datos[:, :-1]
     np.shape(X)         # (97, 1)
@@ -72,15 +75,34 @@ def main():
     X = np.hstack([np.ones([m, 1]), X])
     #print(X)
     alpha = 0.01
-    teta = np.zeros(2)
-    tetas, costes =  descenso_gradiente(X, Y, teta, alpha)
-    tetas, costes =  descenso_gradiente(X, Y, tetas, alpha)
-    """
-    for i in range(1500):
+    tetas = np.zeros(2)
+    i=0
+
+    #for i in range(15):
+    while i < iteraciones and not fin:
         print(i)
-        teta, costes =  descenso_gradiente(X, Y, teta, alpha)
-        plt.scatter(i, costes, marker='x', color = "blue")
-    """
+        tempTetas = copy.deepcopy(tetas)
+
+        #print("[MAIN] Teta IN: "+str(tetas))
+        tetas, costes =  descenso_gradiente(X, Y, tetas, alpha)
+        fin = np.array_equal(tempTetas, tetas)
+        print(tempTetas)
+        print(tetas)
+        print("fin="+str(fin))
+        i+=1
+        #print("[MAIN] Teta OUT: "+str(tetas))
+       # plt.scatter(i, costes, marker='x', color = "blue")
+    
+
+    H1 = np.dot(X[0], tetas)
+    H2 = np.dot(X[np.shape(X)[0]-1], tetas)
+
+    #plt.scatter(np.array([X[0],H1]), np.array([X[np.shape(X)[0]-1],H2]))
+    plt.scatter([X[0],H1], [X[np.shape(X)[0]-1],H2])
+
+
+
     plt.show()
 
 main()
+
