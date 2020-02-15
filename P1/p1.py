@@ -13,8 +13,8 @@ def pinta(puntosX, puntosY):
     #plt.scatter(x[encima], y[encima], marker='+',color = "grey")
     #plt.plot(puntosX, puntosY, color = "blue")
     #plt.savefig(dir+'-bucles.png') 
-    plt.show()
-    plt.clf()
+    #plt.show()
+    #plt.clf()
 
 def coste(X, Y, Theta):
     H = np.dot(X, Theta)
@@ -68,7 +68,7 @@ def main():
     np.shape(Y)         # (97,)
     m = np.shape(X)[0]
     n = np.shape(X)[1]
-    #pinta(X,Y)
+    pinta(X,Y)
     # añadimos una columna de 1's a la X
     #print(X)
     #print("nuevo")
@@ -97,10 +97,15 @@ def main():
     H1 = np.dot(X[0], tetas)
     H2 = np.dot(X[np.shape(X)[0]-1], tetas)
 
+    print(H1)
+    print(X[0][1])
+    print(".----")
+    print(H2)
     #plt.scatter(np.array([X[0],H1]), np.array([X[np.shape(X)[0]-1],H2]))
-    plt.scatter([X[0],H1], [X[np.shape(X)[0]-1],H2])
-
-
+    #plt.scatter(X[0],H1 ) #, [X[np.shape(X)[0]-1],H2])
+    
+    plt.plot([X[np.shape(X)[0]-1][1],H2], [X[0][1],H1], label='linear')
+    #plt.plot([X[0],H1], [X[np.shape(X)[0]-1],H2], label='linear')
 
     plt.show()
 
