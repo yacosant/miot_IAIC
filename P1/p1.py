@@ -29,7 +29,7 @@ def gradiente(X, Y, Theta, alpha):
     Aux = (H - Y)
     for i in range(n):
         Aux_i = Aux * X[:, i]
-        NuevaTheta -= (alpha / m) * Aux_i.sum()
+        NuevaTheta[i] -= (alpha / m) * Aux_i.sum()
     return NuevaTheta
 
 def descenso_gradiente(X, Y, teta, alpha):
@@ -51,14 +51,17 @@ def descenso_gradiente(X, Y, teta, alpha):
     teta[0]= teta[0]-val*temp0
     teta[1]= teta[1]-val*temp1
     """
-    costes = coste(X,Y,teta)
     teta = gradiente(X,Y,teta,alpha)
+    costes = coste(X,Y,teta)
     print("Coste: "+str(costes)+" - Teta: "+str(teta))
     print("[descenso_gradiente] Teta OUt: "+str(teta))
     return teta,costes
 
+#def pintarLinea() :
+  #  plt.plot(X,teta[0] + teta[1]*X, linestyle='-',color='blue')
+
 def main():
-    iteraciones = 15
+    iteraciones = 1500
     fin = False
 
     datos = carga_csv('ex1data1.csv')
@@ -79,7 +82,7 @@ def main():
     i=0
 
     #for i in range(15):
-    while i < iteraciones and not fin:
+    while i < iteraciones : #and not fin:
         print(i)
         tempTetas = copy.deepcopy(tetas)
 
@@ -90,8 +93,9 @@ def main():
         print(tetas)
         print("fin="+str(fin))
         i+=1
+        plt.plot(X,tetas[0] + tetas[1]*X,color='blue')
         #print("[MAIN] Teta OUT: "+str(tetas))
-       # plt.scatter(i, costes, marker='x', color = "blue")
+        #plt.scatter(i, costes, marker='x', color = "blue")
     
 
     H1 = np.dot(X[0], tetas)
@@ -104,7 +108,9 @@ def main():
     #plt.scatter(np.array([X[0],H1]), np.array([X[np.shape(X)[0]-1],H2]))
     #plt.scatter(X[0],H1 ) #, [X[np.shape(X)[0]-1],H2])
     
-    plt.plot([X[np.shape(X)[0]-1][1],H2], [X[0][1],H1], label='linear')
+    #profesor plt.plot([X[0][1],X[np.shape(X)[0]-1][1]], [H1,H2], label='linear')
+    plt.plot(X,tetas[0] + tetas[1]*X,color='blue')
+
     #plt.plot([X[0],H1], [X[np.shape(X)[0]-1],H2], label='linear')
 
     plt.show()
