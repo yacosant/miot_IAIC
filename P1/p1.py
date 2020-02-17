@@ -93,7 +93,9 @@ def main():
         print(tetas)
         print("fin="+str(fin))
         i+=1
-        plt.plot(X,tetas[0] + tetas[1]*X,color='blue')
+        
+        #plt.plot(X,tetas[0] + tetas[1]*X,color='blue') #Para pitnar todas las lineas
+        
         #print("[MAIN] Teta OUT: "+str(tetas))
         #plt.scatter(i, costes, marker='x', color = "blue")
     
@@ -113,7 +115,27 @@ def main():
 
     #plt.plot([X[0],H1], [X[np.shape(X)[0]-1],H2], label='linear')
 
+    make_data([-10,10], [-1,4], X, Y)       #Pinta el mapa topometrico!
+    
     plt.show()
 
+def make_data(t0_range, t1_range, X, Y):
+    """Genera las matrices X,Y,Z para generar un plot en 3D
+    """
+    step = 0.1
+    Theta0 = np.arange(t0_range[0], t0_range[1], step)
+    Theta1 = np.arange(t1_range[0], t1_range[1], step)
+    Theta0, Theta1 = np.meshgrid(Theta0, Theta1)
+    # Theta0 y Theta1 tienen las misma dimensiones, de forma que
+    # cogiendo un elemento de cada uno se generan las coordenadas x,y
+    # de todos los puntos de la rejilla
+    Coste = np.empty_like(Theta0)
+    for ix, iy in np.ndindex(Theta0.shape):
+        Coste[ix, iy] = coste(X, Y, [Theta0[ix, iy], Theta1[ix, iy]])
+
+    plt.contour(Theta0, Theta1, Coste, np.logspace(-2, 3, 20), colors='blue')   
+    return [Theta0, Theta1, Coste]
+
 main()
+
 
