@@ -2,6 +2,8 @@ import numpy as np
 import copy
 from pandas.io.parsers import read_csv
 import matplotlib.pyplot as plt
+import scipy.optimize as opt
+
 
 def carga_csv(file_name):
     valores = read_csv(file_name, header=None).values
@@ -13,9 +15,11 @@ def sigmoid(x):
     return s
 
 def pinta_frontera_recta(X, Y, theta):
-    plt.figure()
-    x1_min, x1_max = X[:, 0].min(), X[:, 0].max()
-    x2_min, x2_max = X[:, 1].min(), X[:, 1].max()
+
+    pinta_puntos(X,Y)
+    #plt.figure()
+    x1_min, x1_max = X[:,1].min(), X[:,1].max()
+    x2_min, x2_max = X[:, 2].min(), X[:, 2].max()
 
     xx1, xx2 = np.meshgrid(np.linspace(x1_min, x1_max),
     np.linspace(x2_min, x2_max))
@@ -25,12 +29,24 @@ def pinta_frontera_recta(X, Y, theta):
     xx2.ravel()].dot(theta))
     h = h.reshape(xx1.shape)
 
-    # el cuarto parámetro es el valor de z cuya frontera se
-    # quiere pintar
+    # el cuarto parámetro es el valor de z cuya frontera se quiere pintar
     plt.contour(xx1, xx2, h, [0.5], linewidths=1, colors='b')
     #plt.savefig("frontera.pdf")
     plt.show()
-    plt.close()
+    #plt.close()
+
+def cost(theta, X, Y):
+    # H = sigmoid(np.matmul(X, np.transpose(theta)))
+    H = sigmoid(np.matmul(X, theta))
+    # cost = (- 1 / (len(X))) * np.sum( Y * np.log(H) + (1 - Y) * np.log(1 - H) )
+    cost = (- 1 / (len(X))) * (np.dot(Y, np.log(H)) + np.dot((1 - Y), np.log(1 - H)))
+    return cost
+
+def gradient(theta, XX, Y):
+    H = sigmoid( np.matmul(XX, theta) )
+    grad = (1 / len(Y)) * np.matmul(XX.T, H - Y)
+    return grad
+
 
 def pinta_puntos(X,Y):
     plt.figure()
@@ -42,14 +58,9 @@ def pinta_puntos(X,Y):
         if i==1:
             mark='+'
             cc='k'
-        plt.scatter(X[pos, 0], X[pos,1], marker=mark, c=cc)
-    plt.show()
+        plt.scatter(X[pos, 1], X[pos,2], marker=mark, c=cc)
+    #plt.show()
 
-def pinta_puntoss(X,Y):
-    plt.figure()
-    pos= np.where(Y== 1)
-    plt.scatter(X[pos, 0], X[pos,1], marker='+', c='k')
-    plt.show()
 
 def main():
     datos = carga_csv('ex2data1.csv')
@@ -57,8 +68,25 @@ def main():
     np.shape(X)         # (97, 1)
     Y = datos[:, -1]
     np.shape(Y)         # (97,)
+    #pinta_puntos(X,Y)
     m = np.shape(X)[0]
-    n = np.shape(X)[1]
-    pinta_puntos(X,Y)
+    # añadimos una columna de 1's a la X
+    X = np.hstack([np.ones([m, 1]), X])
+    #---
+    ## utilizar para invocar a la función de optimización
+    initialTheta = np.zeros(3) 
+
+
+    coste = cost(initialTheta,X,Y)
+    print("Coste"+ str(coste))
+
+    grad = gradient(initialTheta, X, Y)
+    print("Gradiente"+ str(grad))
+
+    result = opt.fmin_tnc(func=cost , x0=initialTheta , fprime=gradient, args =(X, Y))
+    theta_opt = result[0]
+    print(result)
+
+    pinta_frontera_recta(X,Y,theta_opt)
 
 main()
