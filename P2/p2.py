@@ -84,9 +84,9 @@ def main():
     print("Gradiente"+ str(grad))
 
     result = opt.fmin_tnc(func=cost , x0=initialTheta , fprime=gradient, args =(X, Y))
-    theta_opt = result[0]
+
     print(result)
 
-    pinta_frontera_recta(X,Y,theta_opt)
+    pinta_frontera_recta(X,Y,result[0])
 
 main()
