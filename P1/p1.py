@@ -61,13 +61,15 @@ def main():
         print(theta)
     
     plt.plot(X,theta[0] + theta[1]*X,color='blue') #recta definida por las thetas
+    plt.savefig('p1-puntosYrecta.png')
     plt.show()
     
-    Theta0, Theta1, Coste = make_data([-10,10], [-1,4], X, Y,theta[0],theta[1])       #Pinta el mapa topometrico!
+    Theta0, Theta1, Coste = make_data([-10,10], [-1,4], X, Y,theta[0],theta[1])   
     #Contorno
     plt.figure()
-    plt.contour(Theta0, Theta1, Coste, np.logspace(-2, 3, 20), colors='blue')   #topografico
+    plt.contour(Theta0, Theta1, Coste, np.logspace(-2, 3, 20), colors='blue')  
     plt.plot(theta[0],theta[1], marker='+',color = "red")
+    plt.savefig('p1-contorno.png')
     plt.show()
 
     # Plot the surface.
@@ -88,7 +90,7 @@ def main():
 	# Add a color bar which maps values to colors.
     fig.colorbar(surf, shrink=0.5, aspect=5)
 
-    plt.savefig('3d.png')
+    plt.savefig('p1-3d.png')
     plt.show()
 
 
