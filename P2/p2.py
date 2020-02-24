@@ -61,6 +61,14 @@ def pinta_puntos(X,Y):
         plt.scatter(X[pos, 1], X[pos,2], marker=mark, c=cc)
     #plt.show()
 
+def evaluaPorcentaje(X,Y,Theta):
+    m = len(X)
+    X = np.hstack([np.ones((m, 1)), X])
+    prediccion = 1 / (1 + np.exp(-np.dot(Theta, X.T)))
+
+    unos = ((prediccion >= 0.5 and Y == 1) or (prediccion < 0.5 and Y == 0))
+    unos.sum()
+    print(str(unos.sum()*100/m)+"% de aciertos")
 
 def main():
     datos = carga_csv('ex2data1.csv')
@@ -88,5 +96,5 @@ def main():
     print(result)
 
     pinta_frontera_recta(X,Y,result[0])
-
+    evaluaPorcentaje(X,Y,initialTheta)
 main()
