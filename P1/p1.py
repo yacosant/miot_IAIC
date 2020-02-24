@@ -3,6 +3,12 @@ import copy
 from pandas.io.parsers import read_csv
 import matplotlib.pyplot as plt
 
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
+from matplotlib.ticker import LinearLocator, FormatStrFormatter
+
+fig = plt.figure()
+
 def carga_csv(file_name):
     valores = read_csv(file_name, header=None).values
     # suponemos que siempre trabajaremos con float
@@ -10,11 +16,6 @@ def carga_csv(file_name):
 
 def pinta(puntosX, puntosY):
     plt.scatter(puntosX, puntosY, marker='+', color = "red")
-    #plt.scatter(x[encima], y[encima], marker='+',color = "grey")
-    #plt.plot(puntosX, puntosY, color = "blue")
-    #plt.savefig(dir+'-bucles.png') 
-    #plt.show()
-    #plt.clf()
 
 def coste(X, Y, Theta):
     H = np.dot(X, Theta)
@@ -32,37 +33,14 @@ def gradiente(X, Y, Theta, alpha):
         NuevaTheta[i] -= (alpha / m) * Aux_i.sum()
     return NuevaTheta
 
-def descenso_gradiente(X, Y, teta, alpha):
-    print("[descenso_gradiente] Teta in: "+str(teta))
-    #m=10000
-    m = np.shape(X)[0]
-
-   
-    """
-    temp0 =0
-    temp1 =0
-    val = alpha*1/m
-
-    #realizar sumatorio
-    for i in range(m):
-        temp0 += teta.dot(X) - Y
-        temp1 += temp0 * X
-    #actualizar valores
-    teta[0]= teta[0]-val*temp0
-    teta[1]= teta[1]-val*temp1
-    """
-    teta = gradiente(X,Y,teta,alpha)
-    costes = coste(X,Y,teta)
-    print("Coste: "+str(costes)+" - Teta: "+str(teta))
-    print("[descenso_gradiente] Teta OUt: "+str(teta))
-    return teta,costes
-
-#def pintarLinea() :
-  #  plt.plot(X,teta[0] + teta[1]*X, linestyle='-',color='blue')
+def descenso_gradiente(X, Y, theta, alpha):
+    theta = gradiente(X,Y,theta,alpha)
+    costes = coste(X,Y,theta)
+    print("Coste: "+str(costes)+" - theta: "+str(theta))
+    return theta,costes
 
 def main():
     iteraciones = 1500
-    fin = False
 
     datos = carga_csv('ex1data1.csv')
     X = datos[:, :-1]
@@ -70,56 +48,51 @@ def main():
     Y = datos[:, -1]
     np.shape(Y)         # (97,)
     m = np.shape(X)[0]
-    n = np.shape(X)[1]
     pinta(X,Y)
     # añadimos una columna de 1's a la X
-    #print(X)
-    #print("nuevo")
     X = np.hstack([np.ones([m, 1]), X])
-    #print(X)
+
     alpha = 0.01
-    tetas = np.zeros(2)
+    theta = np.zeros(2)
     i=0
-
-    #for i in range(15):
-    while i < iteraciones : #and not fin:
+    for i in range(iteraciones):
         print(i)
-        tempTetas = copy.deepcopy(tetas)
-
-        #print("[MAIN] Teta IN: "+str(tetas))
-        tetas, costes =  descenso_gradiente(X, Y, tetas, alpha)
-        fin = np.array_equal(tempTetas, tetas)
-        print(tempTetas)
-        print(tetas)
-        print("fin="+str(fin))
-        i+=1
-        
-        #plt.plot(X,tetas[0] + tetas[1]*X,color='blue') #Para pitnar todas las lineas
-        
-        #print("[MAIN] Teta OUT: "+str(tetas))
-        #plt.scatter(i, costes, marker='x', color = "blue")
+        theta, costes =  descenso_gradiente(X, Y, theta, alpha)
+        print(theta)
     
-
-    H1 = np.dot(X[0], tetas)
-    H2 = np.dot(X[np.shape(X)[0]-1], tetas)
-
-    print(H1)
-    print(X[0][1])
-    print(".----")
-    print(H2)
-    #plt.scatter(np.array([X[0],H1]), np.array([X[np.shape(X)[0]-1],H2]))
-    #plt.scatter(X[0],H1 ) #, [X[np.shape(X)[0]-1],H2])
+    plt.plot(X,theta[0] + theta[1]*X,color='blue') #recta definida por las thetas
+    plt.show()
     
-    #profesor plt.plot([X[0][1],X[np.shape(X)[0]-1][1]], [H1,H2], label='linear')
-    plt.plot(X,tetas[0] + tetas[1]*X,color='blue')
-
-    #plt.plot([X[0],H1], [X[np.shape(X)[0]-1],H2], label='linear')
-
-    make_data([-10,10], [-1,4], X, Y)       #Pinta el mapa topometrico!
-    
+    Theta0, Theta1, Coste = make_data([-10,10], [-1,4], X, Y,theta[0],theta[1])       #Pinta el mapa topometrico!
+    #Contorno
+    plt.figure()
+    plt.contour(Theta0, Theta1, Coste, np.logspace(-2, 3, 20), colors='blue')   #topografico
+    plt.plot(theta[0],theta[1], marker='+',color = "red")
     plt.show()
 
-def make_data(t0_range, t1_range, X, Y):
+    # Plot the surface.
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    surf = ax.plot_surface(Theta0, Theta1, Coste, linewidth=0, antialiased=False,cmap=cm.coolwarm)
+    # Customize the z axis.
+    ax.set_zlim(0,700)
+    ax.zaxis.set_major_locator(LinearLocator(10))
+    ax.zaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+
+    ax.set_xlim(-10,10)
+    ax.xaxis.set_major_locator(LinearLocator(5))
+    ax.xaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+    ax.yaxis.set_major_locator(LinearLocator(5))
+    ax.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+
+	# Add a color bar which maps values to colors.
+    fig.colorbar(surf, shrink=0.5, aspect=5)
+
+    plt.savefig('3d.png')
+    plt.show()
+
+
+def make_data(t0_range, t1_range, X, Y,t1,t2):
     """Genera las matrices X,Y,Z para generar un plot en 3D
     """
     step = 0.1
@@ -133,8 +106,7 @@ def make_data(t0_range, t1_range, X, Y):
     for ix, iy in np.ndindex(Theta0.shape):
         Coste[ix, iy] = coste(X, Y, [Theta0[ix, iy], Theta1[ix, iy]])
 
-    plt.contour(Theta0, Theta1, Coste, np.logspace(-2, 3, 20), colors='blue')   
-    return [Theta0, Theta1, Coste]
+    return (Theta0, Theta1, Coste)
 
 main()
 
