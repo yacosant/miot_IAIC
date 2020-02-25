@@ -42,34 +42,37 @@ def descenso_gradiente(X, Y, theta, alpha):
 def main():
     iteraciones = 1500
 
-    datos = carga_csv('ex1data1.csv')
+    datos = carga_csv('ex1data2.csv')
     X = datos[:, :-1]
     np.shape(X)         # (97, 1)
     Y = datos[:, -1]
     np.shape(Y)         # (97,)
-    m = np.shape(X)[0]
-    pinta(X,Y)
+
+    Xn, mu, sigma = normalizar(X)
+
+    m = np.shape(Xn)[0]
+    pinta(Xn[:, 1],Y)
     # añadimos una columna de 1's a la X
-    X = np.hstack([np.ones([m, 1]), X])
+    X = np.hstack([np.ones([m, 1]), Xn])
 
     alpha = 0.01
-    theta = np.zeros(2)
+    theta = np.array([0., 0.])#np.zeros(2)
     i=0
     for i in range(iteraciones):
         print(i)
-        theta, costes =  descenso_gradiente(X, Y, theta, alpha)
+        theta, costes =  descenso_gradiente(Xn, Y, theta, alpha)
         print(theta)
     
     plt.plot(X,theta[0] + theta[1]*X,color='blue') #recta definida por las thetas
-    plt.savefig('p1-puntosYrecta.png')
+    plt.savefig('p1.2-puntosYrecta.png')
     plt.show()
     
-    Theta0, Theta1, Coste = make_data([-10,10], [-1,4], X, Y,theta[0],theta[1])   
+    Theta0, Theta1, Coste = make_data([-10,10], [-1,4], Xn, Y,theta[0],theta[1])   
     #Contorno
     plt.figure()
     plt.contour(Theta0, Theta1, Coste, np.logspace(-2, 3, 20), colors='blue')  
     plt.plot(theta[0],theta[1], marker='+',color = "red")
-    plt.savefig('p1-contorno.png')
+    plt.savefig('p1.2-contorno.png')
     plt.show()
 
     # Plot the surface.
@@ -90,7 +93,7 @@ def main():
 	# Add a color bar which maps values to colors.
     fig.colorbar(surf, shrink=0.5, aspect=5)
 
-    plt.savefig('p1-3d.png')
+    plt.savefig('p1.2-3d.png')
     plt.show()
 
 
@@ -109,6 +112,17 @@ def make_data(t0_range, t1_range, X, Y,t1,t2):
         Coste[ix, iy] = coste(X, Y, [Theta0[ix, iy], Theta1[ix, iy]])
 
     return (Theta0, Theta1, Coste)
+
+def normalizar(X):
+    n = np.shape(X)[1]
+    mu = np.array([0., 0.])
+    sigma = np.array([0., 0.])
+    Xn = X
+    for i in range(n):
+        mu[i] = (X[:, i].mean())
+        sigma[i] = (X[:, i].std())
+        Xn[:, i] = (X[:, i] - mu[i] / sigma[i])
+    return Xn, mu, sigma
 
 main()
 
