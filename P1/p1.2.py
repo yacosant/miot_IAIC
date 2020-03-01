@@ -18,21 +18,37 @@ def pinta(puntosX, puntosY):
     plt.scatter(puntosX, puntosY, marker='+', color = "red")
 
 def coste(X, Y, Theta):
+    """
+    print("teta:"+str(Theta))
+    print("x:"+str(X))
+    print("y:"+str(Y))
+    """
+    
+    """
+    m = len(X)
+    coste = (1 / (2 * m)) * np.dot((np.dot(Theta, X) - Y).T, np.dot(Theta, X) - Y) 
+    print(coste)
+    return coste"""
+    #"""mi codigo:
     H = np.dot(X, Theta)
     Aux = (H - Y) ** 2
     return Aux.sum() / (2 * len(X))
+    #"""
+    
 
 def gradiente(X, Y, Theta, alpha):
+    
     NuevaTheta = Theta
     m = np.shape(X)[0]
     n = np.shape(X)[1]
     H = np.dot(X, Theta)
     Aux = (H - Y)
-    for i in range(n):
+    for i in range(n):#igual a for n in range(columns):
         Aux_i = Aux * X[:, i]
         NuevaTheta[i] -= (alpha / m) * Aux_i.sum()
     return NuevaTheta
-
+    
+    
 def descenso_gradiente(X, Y, theta, alpha):
     theta = gradiente(X,Y,theta,alpha)
     costes = coste(X,Y,theta)
@@ -41,32 +57,48 @@ def descenso_gradiente(X, Y, theta, alpha):
 
 def main():
     iteraciones = 1500
+    alpha = [0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1]
 
     datos = carga_csv('ex1data2.csv')
-    X = datos[:, :-1]
-    np.shape(X)         # (97, 1)
-    Y = datos[:, -1]
-    np.shape(Y)         # (97,)
+    X = datos[:, 0:-1]#[:, :-1]
+    Y = datos[:, -1:]
 
     Xn, mu, sigma = normalizar(X)
-
-    m = np.shape(Xn)[0]
-    pinta(Xn[:, 1],Y)
-    # añadimos una columna de 1's a la X
-    X = np.hstack([np.ones([m, 1]), Xn])
-
-    alpha = 0.01
-    theta = np.array([0., 0.])#np.zeros(2)
-    i=0
-    for i in range(iteraciones):
-        print(i)
-        theta, costes =  descenso_gradiente(Xn, Y, theta, alpha)
-        print(theta)
+    m = len(X)
     
+    fig = plt.figure()
+    ax = fig.gca() #???
+
+    costes = []
+    thetas = []
+    i=0
+    
+    for a in alpha: 
+        # añadimos una columna de 1's a la X
+        Xn = np.hstack([np.ones([m, 1]), Xn])
+        theta = np.array(np.ones((len(Xn[0])))).reshape(len(Xn[0]), 1)
+
+        fig = plt.figure()
+        ax = fig.gca()
+        for i in range(iteraciones):
+            #sumatorio = np.array([])
+            print(i)
+            theta, coste =  descenso_gradiente(Xn, Y, theta, a)
+            ax.plot(i, coste, 'bx')
+            #plt.savefig('coste-'+str(alpha)+'.png')
+            #print(theta)
+        plt.savefig('coste-'+str(a)+'.png')
+        thetas.append(theta)
+        costes.append(coste)
+        fig.clf()
+
+    """
     plt.plot(X,theta[0] + theta[1]*X,color='blue') #recta definida por las thetas
     plt.savefig('p1.2-puntosYrecta.png')
     plt.show()
-    
+    """
+
+    """
     Theta0, Theta1, Coste = make_data([-10,10], [-1,4], Xn, Y,theta[0],theta[1])   
     #Contorno
     plt.figure()
@@ -95,6 +127,7 @@ def main():
 
     plt.savefig('p1.2-3d.png')
     plt.show()
+    """
 
 
 def make_data(t0_range, t1_range, X, Y,t1,t2):
@@ -113,16 +146,11 @@ def make_data(t0_range, t1_range, X, Y,t1,t2):
 
     return (Theta0, Theta1, Coste)
 
-def normalizar(X):
-    n = np.shape(X)[1]
-    mu = np.array([0., 0.])
-    sigma = np.array([0., 0.])
-    Xn = X
-    for i in range(n):
-        mu[i] = (X[:, i].mean())
-        sigma[i] = (X[:, i].std())
-        Xn[:, i] = (X[:, i] - mu[i] / sigma[i])
-    return Xn, mu, sigma
+def normalizar(x):
+    mu = np.mean(x, axis=0)
+    sigma = np.std(x, axis=0)
+    normalX = (x - mu) / sigma 
+    return (normalX, mu, sigma)
 
 main()
 
