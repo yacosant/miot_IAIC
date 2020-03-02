@@ -38,7 +38,7 @@ def pinta_frontera_recta(X, Y, theta):
 def cost(theta, X, Y):
     # H = sigmoid(np.matmul(X, np.transpose(theta)))
     H = sigmoid(np.matmul(X, theta))
-    # cost = (- 1 / (len(X))) * np.sum( Y * np.log(H) + (1 - Y) * np.log(1 - H) )
+    #cost = (- 1 / (len(X))) * np.sum( Y * np.log(H) + (1 - Y) * np.log(1 - H) )
     cost = (- 1 / (len(X))) * (np.dot(Y, np.log(H)) + np.dot((1 - Y), np.log(1 - H)))
     return cost
 
@@ -61,7 +61,8 @@ def pinta_puntos(X,Y):
         plt.scatter(X[pos, 1], X[pos,2], marker=mark, c=cc)
     #plt.show()
 
-def evaluaPorcentaje(X,Y,Theta):
+def evaluaPorcentaje(X,Y,Theta):    #cambiar funcion!!!
+    """ mi intento de codigo
     m = len(X)
     X = np.hstack([np.ones((m, 1)), X])
     prediccion = 1 / (1 + np.exp(-np.dot(Theta, X.T)))
@@ -69,6 +70,19 @@ def evaluaPorcentaje(X,Y,Theta):
     unos = ((prediccion >= 0.5 and Y == 1) or (prediccion < 0.5 and Y == 0))
     unos.sum()
     print(str(unos.sum()*100/m)+"% de aciertos")
+    """
+    #codigo git:
+    m = len(X)
+    #X = np.hstack([np.ones((m, 1)), X])
+    z=np.dot(Theta, X.T)
+    pred =1 / (1 + np.exp(-z))
+    count = 0
+
+    for i in range(m):
+        if (pred.T[i] >= 0.5 and Y[i] == 1) or (pred.T[i] < 0.5 and Y[i] == 0):
+            count += 1
+
+    print('Hay un {}% de aciertos'.format((count/m)*100))
 
 def main():
     datos = carga_csv('ex2data1.csv')
