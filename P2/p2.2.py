@@ -36,12 +36,17 @@ def pinta_frontera_recta(X, Y, theta):
     plt.show()
     #plt.close()
 
-def cost(theta, X, Y):
+def cost(theta, X, Y, lam):
     # H = sigmoid(np.matmul(X, np.transpose(theta)))
     H = sigmoid(np.matmul(X, theta))
-    #cost = (- 1 / (len(X))) * np.sum( Y * np.log(H) + (1 - Y) * np.log(1 - H) )
-    cost = (- 1 / (len(X))) * (np.dot(Y, np.log(H)) + np.dot((1 - Y), np.log(1 - H)))
+    cost = ((- 1 / (len(X))) * (np.dot(Y, np.log(H)) + np.dot((1 - Y), np.log(1 - H)))) + ((lam / (2 * (len(X)))) * np.sum(theta[1:]**2))
     return cost
+
+def gradient(theta, XX, Y, lam):
+    H = sigmoid( np.matmul(XX, theta) )
+    grad = (1 / len(Y)) * (np.matmul(XX.T, H - Y)) #= los que sean distintos de cero)
+    grad[1:] +=  ((lam/len(Y)) * theta )
+    return grad
 
 def pinta_puntos(X,Y):
     plt.figure()
@@ -104,16 +109,15 @@ def main():
     #---
     ## utilizar para invocar a la función de optimización
     initialTheta = np.zeros(len(X[0]))#np.zeros(3) 
+    lam = 1
 
+    #coste = cost(initialTheta,X,Y, lam)
+    #print("Coste"+ str(coste))
 
-    
-    coste = cost(initialTheta,X,Y)
-    print("Coste"+ str(coste))
+    #grad = gradient(initialTheta, X, Y)
+    #print("Gradiente"+ str(grad))
 
-    grad = gradient(initialTheta, X, Y)
-    print("Gradiente"+ str(grad))
-
-    result = opt.fmin_tnc(func=cost , x0=initialTheta , fprime=gradient, args =(X, Y))
+    result = opt.fmin_tnc(func=cost , x0=initialTheta , fprime=gradient, args =(X, Y,lam))
     print("result:")
     print(result)
     Theta = result[0]
