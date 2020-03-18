@@ -39,6 +39,20 @@ def descenso_gradiente(X, Y, theta, alpha):
     costes = coste(X,Y,theta)
     return theta,costes
 
+
+def normalizar(X):
+    mu = np.mean(X, axis=0)
+    sigma = np.std(X, axis=0)
+    normalX = (X - mu) / sigma 
+    return (normalX, mu, sigma)
+
+
+def calcularNormal(X,Y):
+    X = np.hstack([np.ones((len(X), 1)), X])
+    dot = np.linalg.inv(np.dot(X.T, X))
+    return np.dot(np.dot(dot, X.T), Y)
+
+
 def main():
     iteraciones = 1500
     alpha = [0.1, 0.3, 0.01, 0.03, 0.001, 0.003]
@@ -69,20 +83,25 @@ def main():
         thetas.append(theta)
         costes.append(coste)
         plt.savefig('coste-'+str(a)+'.png')
-        print("alpha: "+str(a)+ " Coste: "+str(coste)+" - theta: "+str(theta))
+        print("Alpha: "+str(a)+ " Coste: "+str(coste)+" - theta: "+str(theta))
         fig.clf()
 
     thetaFinal= thetas[np.argmin(costes)]
     costeFinal= np.min(costes)
     aFinal= alpha[np.argmin(costes)]
-    print(thetaFinal,costeFinal,aFinal)
+    print("[FINAL] Alpha: "+str(aFinal)+ " Coste: "+str(costeFinal)+" - Theta: "+str(thetaFinal))
 
-def normalizar(x):
-    mu = np.mean(x, axis=0)
-    sigma = np.std(x, axis=0)
-    normalX = (x - mu) / sigma 
-    return (normalX, mu, sigma)
+    xn = np.array([1, (1650 - mu[0]) / sigma[0], (3 - mu[1]) / sigma[1]])  # Genera un neuvo dato normalizado
+    yd = np.dot(xn.T, thetaFinal)
+    ThetaFormula = calcularNormal(X, Y)
+    x = np.array([1, 1650, 3])
+    yf = np.dot(x.T, ThetaFormula)
 
+    print("Una casa con una superficie de 1.650 pies cuadrados y 3 habitaciones costará: ")
+    print("[DESCENSO] "+str(round(yd[0],2))+" euros.")
+    print("[FORMULA]  "+str(round(yf[0],2))+" euros.")
+   
+################
 main()
 
 
