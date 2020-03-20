@@ -8,32 +8,11 @@ from sklearn.preprocessing import PolynomialFeatures
 
 def carga_csv(file_name):
     valores = read_csv(file_name, header=None).values
-    # suponemos que siempre trabajaremos con float
     return valores.astype(float)
 
 def sigmoid(x):
     s = 1 / (1 + np.exp(-x))
     return s
-
-def pinta_frontera_recta(X, Y, theta):
-    pinta_puntos(X,Y)
-    #plt.figure()
-    x1_min, x1_max = X[:,1].min(), X[:,1].max()
-    x2_min, x2_max = X[:, 2].min(), X[:, 2].max()
-
-    xx1, xx2 = np.meshgrid(np.linspace(x1_min, x1_max),
-    np.linspace(x2_min, x2_max))
-
-    h = sigmoid(np.c_[np.ones((xx1.ravel().shape[0], 1)),
-    xx1.ravel(),
-    xx2.ravel()].dot(theta))
-    h = h.reshape(xx1.shape)
-
-    # el cuarto parámetro es el valor de z cuya frontera se quiere pintar
-    plt.contour(xx1, xx2, h, [0.5], linewidths=1, colors='b')
-    #plt.savefig("frontera.pdf")
-    plt.show()
-    #plt.close()
 
 def cost(theta, X, Y, lam):
     m = len(X)
@@ -69,19 +48,17 @@ def pinta_puntos(X,Y):
             mark='+'
             cc='k'
         plt.scatter(X[pos, 0], X[pos,1], marker=mark, c=cc)
-    #plt.show()
 
-def plot_decisionboundary(X, Y, theta, poly):
-    #plt.clf()
-    #plt.figure()
+
+def plot_decisionboundary(X, Y, theta, poly,lam):
     x1_min, x1_max = X[:, 1].min(), X[:, 1].max()
     x2_min, x2_max = X[:, 2].min(), X[:, 2].max()
     xx1, xx2 = np.meshgrid(np.linspace(x1_min, x1_max),np.linspace(x2_min, x2_max))
     h = sigmoid(poly.fit_transform(np.c_[xx1.ravel(), xx2.ravel()]).dot(theta))
     h = h.reshape(xx1.shape)
     plt.contour(xx1, xx2, h, [0.5], linewidths=1, colors='g')
-    plt.savefig("boundary.png")
-    #plt.close()
+    plt.savefig("boundary"+str(lam)+".png")
+
 
 def main():
     datos = carga_csv('ex2data2.csv')
@@ -90,38 +67,25 @@ def main():
     Y = datos[:, -1]
     np.shape(Y)
     pinta_puntos(X,Y)
-    m = np.shape(X)[0]
 
     poly = PolynomialFeatures(6)
     X2 = poly.fit_transform(X)
-    initialTheta = np.zeros(X2.shape[1]) #np.zeros(len(X[0]))#np.zeros(3) 
-    lam = 1
+    initialTheta = np.zeros(X2.shape[1])
     
+    lam=1
     coste = cost(initialTheta,X2,Y, lam)
     print("Coste: "+ str(coste))
     gradiente  = gradient(initialTheta,X2,Y,lam)
-    print("gradiente: "+ str(gradiente))
+    print("Gradiente: "+ str(gradiente))
+    #plt.close()
+    lams = [0.1, 0.3, 0.01, 0.03, 0.001, 0.003, 0.000003, 40]
+    
+    for lam in lams: 
+        pinta_puntos(X,Y)
+        print("[LAMDA: "+str(lam)+"]-------------")
+        teta = costeMinimo(X2,Y, lam)
+        plot_decisionboundary(X2, Y, teta, poly,lam)
+        
 
-    teta = costeMinimo(X2,Y, lam)
-    plot_decisionboundary(X2, Y, teta, poly)
-    plt.show()
-"""
-    #grad = gradient(initialTheta, X, Y)
-    #print("Gradiente"+ str(grad))
-
-    result = opt.fmin_tnc(func=cost , x0=initialTheta , fprime=gradient, args =(X, Y,lam))
-    print("result:")
-    print(result)
-    Theta = result[0]
-    pinta_puntos(X,Y)
-    #plt.show()
-
-   
-    plot_decisionboundary(X2, Y, result[0], poly)
-
-    #pinta_frontera_recta(X,Y,result[0])
-    #evaluaPorcentaje(X,Y,initialTheta)
-
-    """
 main()
 
