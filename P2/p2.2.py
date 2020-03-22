@@ -66,26 +66,17 @@ def main():
     np.shape(X)
     Y = datos[:, -1]
     np.shape(Y)
-    pinta_puntos(X,Y)
 
     poly = PolynomialFeatures(6)
     X2 = poly.fit_transform(X)
-    initialTheta = np.zeros(X2.shape[1])
-    
-    lam=1
-    coste = cost(initialTheta,X2,Y, lam)
-    print("Coste: "+ str(coste))
-    gradiente  = gradient(initialTheta,X2,Y,lam)
-    print("Gradiente: "+ str(gradiente))
-    #plt.close()
-    lams = [0.1, 0.3, 0.01, 0.03, 0.001, 0.003, 0.000003, 40]
+
+    lams = [1,0.1, 0.3, 0.01, 0.03, 0.001, 0.003, 0.000003, 50, 100, 500]
     
     for lam in lams: 
         pinta_puntos(X,Y)
         print("[LAMDA: "+str(lam)+"]-------------")
-        teta = costeMinimo(X2,Y, lam)
-        plot_decisionboundary(X2, Y, teta, poly,lam)
+        thetaMin = costeMinimo(X2,Y, lam)
+        plot_decisionboundary(X2, Y, thetaMin, poly,lam)
         
-
 main()
 

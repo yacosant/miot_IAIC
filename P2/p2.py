@@ -67,24 +67,17 @@ def evaluaPorcentaje(X,Y,Theta):
 def main():
     datos = carga_csv('ex2data1.csv')
     X = datos[:, :-1]
-    np.shape(X)         # (97, 1)
+    np.shape(X)         
     Y = datos[:, -1]
-    np.shape(Y)         # (97,)
+    np.shape(Y)         
     m = np.shape(X)[0]
-    # añadimos una columna de 1's a la X
     X = np.hstack([np.ones([m, 1]), X])
 
     initialTheta = np.zeros(3) 
 
-    coste = cost(initialTheta,X,Y)
-    print("Coste"+ str(coste))
-
-    grad = gradient(initialTheta, X, Y)
-    print("Gradiente"+ str(grad))
-
     result = opt.fmin_tnc(func=cost , x0=initialTheta , fprime=gradient, args =(X, Y))
 
-    print(result)
+    print("Result :"+str(result))
 
     pinta_frontera_recta(X,Y,result[0])
     evaluaPorcentaje(X,Y,initialTheta)
