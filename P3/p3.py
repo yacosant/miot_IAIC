@@ -41,15 +41,32 @@ def costeMinimo(XX, Y, lam):
     return result[0]
 
 def oneVsAll(X, y, num_etiquetas, reg):
-    m = len(X[0])
-    thetas = np.zeros((num_etiquetas, m))
+    thetas = np.zeros((num_etiquetas, len(X[0])))
     y[y == 10] = 0
     for e in range(num_etiquetas):
         if y == e:  yy = 1
         else: yy = 0
         thetas[e] = costeMinimo(X, yy, reg)  # Calcula el coste de que sea esa etiqueta
     return thetas
-    
+
+def clasificador(X, Thetas):
+	res = [0] * len(Thetas)
+	i = 0
+	for t in Thetas:
+		res[i] = sigmoid(np.dot(t, X.T))
+		i += 1
+	return np.argmax(res[:10])  
+
+def exec(X, thetas,n):
+    for i in range(n): 
+        sample = np.random.choice(X.shape[0], 1)
+        plt.imshow(X[sample, :].reshape(-1, 20).T)
+        plt.axis('off')
+        val = clasificador(X[sample, :], thetas)  
+        plt.title('Se clasifica como: {}'.format(val))
+        plt.savefig('ejemplo{}.png'.format(i)) 
+        plt.show()
+
 def evaluaPorcentaje(X,Y,Theta): 
     cont = 0
     m = len(X)
@@ -71,8 +88,10 @@ def main():
 
 
     thetas = oneVsAll(X, y, 10, 0.1)
-
+    exec(X, thetas,10)
     evaluaPorcentaje(X,y,thetas)
 
+    #repasar evalua evaluaPorcentaje
+    #y onVsAll falla por comparar array con nuemeor. invesgar
 #######
 main()
