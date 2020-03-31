@@ -4,7 +4,6 @@ from scipy.io import loadmat
 import matplotlib.pyplot as plt
 import scipy.optimize as opt
 
-
 def sigmoid(x):
     s = 1 / (1 + np.exp(-x))
     return s
@@ -12,7 +11,7 @@ def sigmoid(x):
 def exec(X, theta1, theta2): 
     m = len(X)
     a1 = np.hstack([np.ones((m, 1)), X])
-    
+
     z2 = np.dot(theta1, a1.T)
     a2 = sigmoid(z2)
     a2 = np.hstack([np.ones((m, 1)), a2.T])
@@ -37,6 +36,5 @@ def main():
 
     h = exec(X, theta1, theta2)
     evaluaPorcentaje(h, y)
-
 #######
 main()
