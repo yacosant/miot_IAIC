@@ -117,7 +117,7 @@ def h(x, theta1, theta2):
 
 def getH(x, theta1, theta2):
 	z2 = np.dot(theta1, x.T)
-	a2 = g(z2)
+	a2 = sigmoid(z2)
 	m = len(a2.T)
 	a2 = np.hstack([np.ones((m, 1)), a2.T])
 	z3 = np.dot(theta2, a2.T)
