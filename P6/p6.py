@@ -63,11 +63,11 @@ def problema2():
     help.plt.show()
 
 
-def problemaX(num, model, X, y, ver):
+def problemaX(num, model, X, y, ver, ep):
     help.plot_data(X,y)
     help.plt.savefig("problema"+str(num)+"-"+str(ver)+"-graf0.png")
 
-    history = model.fit(x=X, y=y, verbose=0, epochs=100)
+    history = model.fit(x=X, y=y, verbose=0, epochs=ep)
     help.plot_loss_accuracy(history)
     help.plt.close(2)
     help.plt.savefig("problema"+str(num)+"-"+str(ver)+"-graf1.png")
@@ -78,34 +78,38 @@ def problemaX(num, model, X, y, ver):
     help.plot_confusion_matrix(model, X, y)
     help.plt.savefig("problema"+str(num)+"-"+str(ver)+"-graf3.png")
     help.plt.show()
+    return model.predict(X) 
 
 
 def main():
-    #generalizar modelos aqui y graficas y tal en el método
 
     #0 - Regresión logistica de dos dimensiones (sin keras)
     #problema0()
 
     #1 - Regresión logistica de dos dimensiones (con keras)
-    X, y = make_classification(n_samples=1000, n_features=2,
+    X1, y1 = make_classification(n_samples=1000, n_features=2,
                             n_redundant=0, n_informative=2, random_state=7, n_clusters_per_class=1)
     model10 = Sequential()
     model10.add(Dense(units=1, input_shape=(2,), activation='sigmoid'))
     model10.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
-    problemaX(1,model10, X,y,0)
+    y_p10 = problemaX(1,model10, X1,y1,0,50)
 
-
-    #2 - Regresión logistica no lineal
-    X, y = make_moons(n_samples=1000, noise=0.05, random_state=0)
+    #2 - version 0 -Regresión logistica no lineal
+    X2, y2 = make_moons(n_samples=1000, noise=0.05, random_state=0)
     model20 = Sequential()
     model20.add(Dense(units=1, input_shape=(2,), activation='sigmoid'))
+    
     model20.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
-    problemaX(2,model20, X,y,0)
+    y_p20 = problemaX(2,model20, X2,y2,0,100)
 
+    #2 - version 1 - Cambiando el modelo para adaptarlo a las lunas
     model21 = Sequential()
-    model21.add(Dense(units=1, input_shape=(2,), activation='sigmoid'))
+    model21.add(Dense(units=4, input_shape=(2,), activation='tanh'))
+    model21.add(Dense(units=2, activation='tanh'))
+    model21.add(Dense(units=1, activation='sigmoid'))
+
     model21.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
-    problemaX(2,model21, X,y,1)
+    y_p21 = problemaX(2,model21, X2,y2,1,100)
 
 
 
