@@ -39,26 +39,25 @@ def problema1():
     
 def problema2():
     #cambiar epochs
-    ep=50
+    ver=1
 
-    X, y = make_moons(n_samples=1000, n_features=2,
-                            n_redundant=0, n_informative=2, random_state=7, n_clusters_per_class=1)
+    X, y = make_moons(n_samples=1000, noise=0.05, random_state=0)
 
     help.plot_data(X,y)
-    help.plt.savefig("problema1-"+str(ep)+"-graf0.png")
+    help.plt.savefig("problema2-"+str(ver)+"-graf0.png")
     #help.plt.show()
 
     model = Sequential()
     model.add(Dense(units=1, input_shape=(2,), activation='sigmoid'))
     model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
 
-    history = model.fit(x=X, y=y, verbose=0, epochs=ep)
+    history = model.fit(x=X, y=y, verbose=0, epochs=100)
     help.plot_loss_accuracy(history)
     help.plt.close(2)
-    help.plt.savefig("problema1-"+str(ep)+"-graf1.png")
+    help.plt.savefig("problema2-"+str(ver)+"-graf1.png")
 
     help.plot_decision_boundary(lambda x: model.predict(x), X, y)
-    help.plt.savefig("problema1-"+str(ep)+"-graf2.png")
+    help.plt.savefig("problema2-"+str(ver)+"-graf2.png")
     help.plt.show()
 
 
