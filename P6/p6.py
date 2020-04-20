@@ -4,7 +4,6 @@ from sklearn.linear_model import LogisticRegression
 from keras.models import Sequential
 from keras.layers import Dense
 
-GRAF_DEBUG = False
 
 def problema0():
     X, y = make_classification(n_samples=1000, n_features=2,
@@ -38,8 +37,8 @@ def problema1():
     help.plt.show()
     
 def problema2():
-    #cambiar epochs
-    ver=1
+    #numero de version 
+    ver=2
 
     X, y = make_moons(n_samples=1000, noise=0.05, random_state=0)
 
@@ -58,20 +57,56 @@ def problema2():
 
     help.plot_decision_boundary(lambda x: model.predict(x), X, y)
     help.plt.savefig("problema2-"+str(ver)+"-graf2.png")
+
+    help.plot_confusion_matrix(model, X, y)
+    help.plt.savefig("problema2-"+str(ver)+"-graf3.png")
+    help.plt.show()
+
+
+def problemaX(num, model, X, y, ver):
+    help.plot_data(X,y)
+    help.plt.savefig("problema"+str(num)+"-"+str(ver)+"-graf0.png")
+
+    history = model.fit(x=X, y=y, verbose=0, epochs=100)
+    help.plot_loss_accuracy(history)
+    help.plt.close(2)
+    help.plt.savefig("problema"+str(num)+"-"+str(ver)+"-graf1.png")
+
+    help.plot_decision_boundary(lambda x: model.predict(x), X, y)
+    help.plt.savefig("problema"+str(num)+"-"+str(ver)+"-graf2.png")
+
+    help.plot_confusion_matrix(model, X, y)
+    help.plt.savefig("problema"+str(num)+"-"+str(ver)+"-graf3.png")
     help.plt.show()
 
 
 def main():
-    #Poner variable a True para mostrar las gráficas iniciales
-    GRAF_DEBUG=True
+    #generalizar modelos aqui y graficas y tal en el método
+
     #0 - Regresión logistica de dos dimensiones (sin keras)
     #problema0()
 
     #1 - Regresión logistica de dos dimensiones (con keras)
-    #problema1()
+    X, y = make_classification(n_samples=1000, n_features=2,
+                            n_redundant=0, n_informative=2, random_state=7, n_clusters_per_class=1)
+    model10 = Sequential()
+    model10.add(Dense(units=1, input_shape=(2,), activation='sigmoid'))
+    model10.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
+    problemaX(1,model10, X,y,0)
+
 
     #2 - Regresión logistica no lineal
-    problema2()
+    X, y = make_moons(n_samples=1000, noise=0.05, random_state=0)
+    model20 = Sequential()
+    model20.add(Dense(units=1, input_shape=(2,), activation='sigmoid'))
+    model20.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
+    problemaX(2,model20, X,y,0)
+
+    model21 = Sequential()
+    model21.add(Dense(units=1, input_shape=(2,), activation='sigmoid'))
+    model21.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
+    problemaX(2,model21, X,y,1)
+
 
 
 
