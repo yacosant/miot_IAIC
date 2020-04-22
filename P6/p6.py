@@ -5,6 +5,7 @@ from keras.models import Sequential
 from keras.optimizers import Adam
 from keras.layers import Dense
 from sklearn.metrics import classification_report
+from keras.utils.np_utils import to_categorical
 
 def problemaX(num, model, X, y, ver, ep):
     help.plot_data(X,y)
@@ -15,6 +16,7 @@ def problemaX(num, model, X, y, ver, ep):
     help.plt.close(2)
     help.plt.savefig("problema"+str(num)+"-"+str(ver)+"-graf1.png")
 
+    #meter un IF segun si es multiclass
     help.plot_decision_boundary(lambda x: model.predict(x), X, y)
     help.plt.savefig("problema"+str(num)+"-"+str(ver)+"-graf2.png")
 
@@ -64,7 +66,7 @@ def main():
     
     model30.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
     y_p30 = problemaX(3,model30, X3,y3,0,100)
-    """
+    
     #3 - version 1 -Regresión logistica no lineal - circulos
     X3, y3 = make_circles(n_samples=1000, noise=0.05, factor=0.3, random_state=0)
     
@@ -74,7 +76,19 @@ def main():
     model31.add(Dense(units=1, activation='sigmoid'))
     
     model31.compile(Adam(lr=0.01), loss='binary_crossentropy', metrics=['acc'])
-    problemaX(3,model31, X3,y3,0,100)
+    problemaX(3,model31, X3,y3,1,100)
+    """
+    
+    #4 - version 0 -Regresión logistica no lineal - Espiral
+    X4, y4 = help.make_multiclass(K=3)
+    
+    model40 = Sequential()
+    model40.add(Dense(units=4, input_shape=(2,), activation='tanh'))
+    model40.add(Dense(units=2, activation='tanh'))
+    model40.add(Dense(units=1, activation='sigmoid'))
+    
+    model40.compile(Adam(lr=0.01), loss='categorical_crossentropy', metrics=['acc'])
+    problemaX(4,model40, X4,y4,0,100)
 
 
 
