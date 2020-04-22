@@ -2,6 +2,7 @@ import helper as help
 from sklearn.datasets import make_classification, make_moons, make_circles, make_classification
 from sklearn.linear_model import LogisticRegression
 from keras.models import Sequential
+from keras.optimizers import Adam
 from keras.layers import Dense
 
 
@@ -87,28 +88,31 @@ def main():
     #problema0()
 
     #1 - Regresión logistica de dos dimensiones (con keras)
+    """
     X1, y1 = make_classification(n_samples=1000, n_features=2,
                             n_redundant=0, n_informative=2, random_state=7, n_clusters_per_class=1)
     model10 = Sequential()
     model10.add(Dense(units=1, input_shape=(2,), activation='sigmoid'))
     model10.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
     y_p10 = problemaX(1,model10, X1,y1,0,50)
-
+    """
     #2 - version 0 -Regresión logistica no lineal
     X2, y2 = make_moons(n_samples=1000, noise=0.05, random_state=0)
+    """
     model20 = Sequential()
     model20.add(Dense(units=1, input_shape=(2,), activation='sigmoid'))
     
     model20.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
     y_p20 = problemaX(2,model20, X2,y2,0,100)
-
+    """
     #2 - version 1 - Cambiando el modelo para adaptarlo a las lunas
     model21 = Sequential()
     model21.add(Dense(units=4, input_shape=(2,), activation='tanh'))
     model21.add(Dense(units=2, activation='tanh'))
     model21.add(Dense(units=1, activation='sigmoid'))
 
-    model21.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
+    #model21.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
+    model21.compile(Adam(lr=0.01), loss='binary_crossentropy', metrics=['acc'])
     y_p21 = problemaX(2,model21, X2,y2,1,100)
 
 
