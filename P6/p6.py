@@ -4,6 +4,7 @@ from sklearn.linear_model import LogisticRegression
 from keras.models import Sequential
 from keras.optimizers import Adam
 from keras.layers import Dense
+from sklearn.metrics import classification_report
 
 def problemaX(num, model, X, y, ver, ep):
     help.plot_data(X,y)
@@ -19,8 +20,12 @@ def problemaX(num, model, X, y, ver, ep):
 
     help.plot_confusion_matrix(model, X, y)
     help.plt.savefig("problema"+str(num)+"-"+str(ver)+"-graf3.png")
-    help.plt.show()
-    return model.predict(X) 
+    #help.plt.show()
+    #print(classification_report(y, model.predict(X), target_names=['0', '1']))
+    pred= help.np.concatenate( (model.predict(X)>0.5), axis=0 ).astype(int)
+    #pred = (pred>0.5)#.astype('int')#.ravel()
+    #return  #model.predict(X)
+    print(classification_report(y, pred, target_names=['0', '1']))
 
 
 def main():
@@ -71,9 +76,12 @@ def main():
     model31.add(Dense(units=2, activation='tanh'))
     model31.add(Dense(units=1, activation='sigmoid'))
     
+    ###model31.compile(Adam(lr=0.01), loss='binary_crossentropy', metrics=['acc'])
     model31.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
-    y_p31 = problemaX(3,model31, X3,y3,0,100)
-
+    problemaX(3,model31, X3,y3,0,100)
+    #print(classification_report(y3, y_p31, target_names=['0', '1']))
+    #print("Y_true:" + str(y3))
+    #print("Y_pred:" + str(y_p31))
 main()
 #comentar que en helper -> cambiado  plt.cm.RdYlBu  y todas las referencias similares
     # por -> plt.cm.get_cmap("RdYlBu")
