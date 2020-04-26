@@ -129,13 +129,14 @@ def main():
         #4 - version 1 -Regresión logistica no lineal - Espiral mejorada
         
         model41 = Sequential()
-        model41.add(Dense(units=4, input_shape=(2,), activation='tanh'))
-        model41.add(Dense(units=2, activation='tanh'))
+        model41.add(Dense(units=64, input_shape=(2,), activation='tanh'))
+        model41.add(Dense(units=32, activation='tanh'))
+        model41.add(Dense(units=16, activation='softmax'))
         model41.add(Dense(units=3, activation='softmax'))
         
         model41.compile(Adam(lr=0.01), loss='categorical_crossentropy', metrics=['acc'])
         y4_cat = to_categorical(y4)
-        problemaX(4,model41, X4,y4_cat,0,100, True,y4)
+        problemaX(4,model41, X4,y4_cat,0,50, True,y4)
 
     else:
         print("Opcion erronea")
