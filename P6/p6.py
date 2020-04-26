@@ -29,8 +29,9 @@ def problemaX(num, model, X, y, ver, ep, multi=False, yy=0):
     
     help.plt.savefig("problema"+str(num)+"-"+str(ver)+"-graf2.png")
 
-    help.plot_confusion_matrix(model, X, yy)
-    help.plt.savefig("problema"+str(num)+"-"+str(ver)+"-graf3.png")
+    if num!= 1: 
+        help.plot_confusion_matrix(model, X, yy)
+        help.plt.savefig("problema"+str(num)+"-"+str(ver)+"-graf3.png")
 
     if multi==False:
         pred= help.np.concatenate( (model.predict(X)>0.5), axis=0 ).astype(int)
