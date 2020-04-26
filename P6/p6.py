@@ -129,6 +129,7 @@ def main():
 
     elif  op==7:        
         #4 - version 1 -Regresión logistica no lineal - Espiral mejorada
+        X4, y4 = help.make_multiclass(K=3)
         
         model41 = Sequential()
         model41.add(Dense(units=64, input_shape=(2,), activation='tanh'))
