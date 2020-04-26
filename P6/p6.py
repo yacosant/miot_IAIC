@@ -29,9 +29,10 @@ def problemaX(num, model, X, y, ver, ep, multi=False, yy=0):
     
     help.plt.savefig("problema"+str(num)+"-"+str(ver)+"-graf2.png")
 
-    if num!= 1: 
-        help.plot_confusion_matrix(model, X, yy)
-        help.plt.savefig("problema"+str(num)+"-"+str(ver)+"-graf3.png")
+    if multi==False:
+        yy=y
+    help.plot_confusion_matrix(model, X, yy)
+    help.plt.savefig("problema"+str(num)+"-"+str(ver)+"-graf3.png")
 
     if multi==False:
         pred= help.np.concatenate( (model.predict(X)>0.5), axis=0 ).astype(int)
@@ -82,7 +83,7 @@ def main():
     
     elif  op==3:
         #2 - version 1 - Cambiando el modelo para adaptarlo a las lunas
-        
+        X2, y2 = make_moons(n_samples=1000, noise=0.05, random_state=0)
         model21 = Sequential()
         model21.add(Dense(units=4, input_shape=(2,), activation='tanh'))
         model21.add(Dense(units=2, activation='tanh'))
