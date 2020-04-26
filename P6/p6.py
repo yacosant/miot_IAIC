@@ -130,7 +130,7 @@ def main():
     elif  op==7:        
         #4 - version 1 -Regresión logistica no lineal - Espiral mejorada
         X4, y4 = help.make_multiclass(K=3)
-        
+
         model41 = Sequential()
         model41.add(Dense(units=64, input_shape=(2,), activation='tanh'))
         model41.add(Dense(units=32, activation='tanh'))
@@ -139,12 +139,10 @@ def main():
         
         model41.compile(Adam(lr=0.01), loss='categorical_crossentropy', metrics=['acc'])
         y4_cat = to_categorical(y4)
-        problemaX(4,model41, X4,y4_cat,0,50, True,y4)
+        problemaX(4,model41, X4,y4_cat,1,50, True,y4)
 
     else:
         print("Opcion erronea")
 
-
 main()
-#comentar que en helper -> cambiado  plt.cm.RdYlBu  y todas las referencias similares
-    # por -> plt.cm.get_cmap("RdYlBu")
+
