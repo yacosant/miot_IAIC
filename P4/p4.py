@@ -31,7 +31,7 @@ def backprop(params, input_size, hidden_size, num_labels, X, y, learning_rate):
     J = 0
     delta1 = np.zeros(theta1.shape)  # (25, 401)
     delta2 = np.zeros(theta2.shape)  # (10, 26)
-    
+    """
     # compute the cost
     for i in range(m):
         first_term = np.multiply(-y[i,:], np.log(h[i,:]))
@@ -42,9 +42,9 @@ def backprop(params, input_size, hidden_size, num_labels, X, y, learning_rate):
     
     # add the cost regularization term
     J += (float(learning_rate) / (2 * m)) * (np.sum(np.power(theta1[:,1:], 2)) + np.sum(np.power(theta2[:,1:], 2)))
-
+    """
     ##### end of cost function logic, below is the new part #####
-    
+    """
     # perform backpropagation
     for t in range(m):
         a1t = a1[t,:]  # (1, 401)
@@ -71,7 +71,8 @@ def backprop(params, input_size, hidden_size, num_labels, X, y, learning_rate):
 
     # unravel the gradient matrices into a single array
     grad = np.concatenate((np.ravel(delta1), np.ravel(delta2)))
-    #grad= gradiente(params, input_size, hidden_size, num_labels, X, y, learning_rate) #no funciona mi funcion gradiente
+    """
+    grad= gradiente(params, input_size, hidden_size, num_labels, X, y, learning_rate) #no funciona mi funcion gradiente
     J= cost(params, input_size, hidden_size, num_labels, X, y, learning_rate)
     return J, grad
     
@@ -79,7 +80,7 @@ def cost(params_rn, num_entradas, num_ocultas, num_etiquetas, X, y, l):
     m = X.shape[0]
     theta1 = params_rn[0:(num_ocultas * (num_entradas + 1))].reshape(num_ocultas, (num_entradas + 1))
     theta2 = params_rn[(num_ocultas * (num_entradas + 1)):].reshape(num_etiquetas, (num_ocultas + 1))
-
+    
     a1, z2, a2, z3, h = forward_propagate(X, theta1, theta2) #Para calcular la h
     J=0
     """
@@ -105,6 +106,35 @@ def gradiente(params_rn, num_entradas, num_ocultas, num_etiquetas, X, y, l):
     theta2 = np.reshape(params_rn[num_ocultas * (num_entradas + 1):], (num_etiquetas, (num_ocultas + 1)))
     delta1 = np.zeros((num_ocultas, num_entradas + 1))
     delta2 = np.zeros((num_etiquetas, num_ocultas + 1))
+    m = X.shape[0]
+    a1, z2, a2, z3, h = forward_propagate(X, theta1, theta2)
+    for t in range(m):
+        a1t = a1[t,:]  # (1, 401)
+        z2t = z2[t,:]  # (1, 25)
+        a2t = a2[t,:]  # (1, 26)
+        ht = h[t,:]  # (1, 10)
+        yt = y[t,:]  # (1, 10)
+        
+        d3t = ht - yt  # (1, 10)
+        
+        z2t = np.insert(z2t, 0, values=np.ones(1))  # (1, 26)
+        d2t = np.multiply((theta2.T * d3t.T).T, sigmoid_gradient(z2t))  # (1, 26)
+        
+        delta1 = delta1 + (d2t[:,1:]).T * a1t
+        delta2 = delta2 + d3t.T * a2t
+        
+    delta1 = delta1 / m
+    delta2 = delta2 / m
+    
+    # add the gradient regularization term
+    delta1[:,1:] = delta1[:,1:] + (theta1[:,1:] * l) / m
+    delta2[:,1:] = delta2[:,1:] + (theta2[:,1:] * l) / m
+    
+
+    # unravel the gradient matrices into a single array
+    grad = np.concatenate((np.ravel(delta1), np.ravel(delta2)))
+    return grad
+    """
     m = len(X)
 
     for i in range(1, m):
@@ -128,8 +158,8 @@ def gradiente(params_rn, num_entradas, num_ocultas, num_etiquetas, X, y, l):
         theta_aux = theta1[:, :]
         theta_aux[:, 0] = 0
         delta1 += np.dot(l2, a1.T) + (l / m) * theta_aux
-
-    return np.concatenate((delta1.ravel(), delta2.ravel())) / m
+    """
+    #return np.concatenate((delta1.ravel(), delta2.ravel())) / m
 
 
 def min_coste(num_entradas, num_ocultas, num_etiquetas, X, y, reg):
