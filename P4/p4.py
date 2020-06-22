@@ -11,14 +11,13 @@ from checkNNGradients import checkNNGradients
 from displayData import displayData
 
 
-def backprop(params, input_size, hidden_size, num_labels, X, y, learning_rate):
+def backprop(params, num_entradas, num_ocultas, num_etiquetas, X, y, l):
     m = X.shape[0]
     X = np.hstack((np.ones((m, 1)), X))
-    #X = np.matrix(X)
     y = np.matrix(y)
     coste = 0
-    grad= gradiente(params, input_size, hidden_size, num_labels, X, y, learning_rate) 
-    coste= cost(params, input_size, hidden_size, num_labels, X, y, learning_rate)
+    grad= gradiente(params, num_entradas, num_ocultas, num_etiquetas, X, y, l) 
+    coste= cost(params, num_entradas, num_ocultas, num_etiquetas, X, y, l)
     return coste, grad
     
 def cost(params_rn, num_entradas, num_ocultas, num_etiquetas, X, y, l):
