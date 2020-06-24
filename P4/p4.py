@@ -3,7 +3,6 @@ import copy
 from scipy.io import loadmat
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import OneHotEncoder
-#import scipy.optimize as opt
 from scipy.optimize import minimize
 import math
 
@@ -12,7 +11,7 @@ from displayData import displayData
 
 
 def backprop(params, num_entradas, num_ocultas, num_etiquetas, X, y, l):
-    print("entra")
+    print("Entra en backprop")
     m = X.shape[0]
     X = np.hstack((np.ones((m, 1)), X))
     y = np.matrix(y)
@@ -105,30 +104,9 @@ def min_coste(num_entradas, num_ocultas, num_etiquetas, X, y, reg):
     return (theta1, theta2)
 
 def evaluar(h, y):
-	m = len(h.T)
-	cont = 0
-	for i in range(m):
-		if (np.argmax(h.T[i]) + 1) == y[i, 0]:
-			cont += 1
-	print('Acierta el {}%\n'.format((cont/m)*100))
-
-"""
-def h(x, theta1, theta2):
-	z2 = np.dot(theta1, x.T)
-	a2 = sigmoid(z2)
-	a2 = np.hstack([1, a2.T])
-	z3 = np.dot(theta2, a2.T)
-	a3 = sigmoid(z3)
-	return a3
-
-def getH(x, theta1, theta2):
-	z2 = np.dot(theta1, x.T)
-	a2 = sigmoid(z2)
-	m = len(a2.T)
-	a2 = np.hstack([np.ones((m, 1)), a2.T])
-	z3 = np.dot(theta2, a2.T)
-	return sigmoid(z3)
-"""
+    correct = [1 if a == b else 0 for (a, b) in zip(h, y)]
+    accuracy = (sum(map(int, correct)) / float(len(correct)))
+    print('Acierta el '+str(accuracy * 100)+'%')
 
 
 def main():
@@ -158,12 +136,11 @@ def main():
     theta_vec = theta_vec.reshape((len(theta_vec), 1))
     """
     t1, t2= min_coste(num_entradas, num_ocultas, num_etiquetas, X, y_cat, l)
-    print(t1)
-    print(t2)
-    a1, z2, a2, z3, h = forward_propagate(X, t1, t2)
-    yPredecido = np.array(np.argmax(h, axis=1) + 1)
-    print(yPredecido)
 
+    X = np.hstack([np.ones((len(X), 1)), X])  
+    a1, z2, a2, z3, h = forward_propagate(X, t1, t2)
+    yPred = np.array(np.argmax(h, axis=1) + 1)
+    evaluar(yPred, y)
 
     
 def mainTest():
@@ -178,7 +155,7 @@ def mainTest():
     num_etiquetas = 10
     l = 1
 
-    X = np.hstack([np.ones((len(X), 1)), X])  # Le añade una columna de unos a las x
+    X = np.hstack([np.ones((len(X), 1)), X])
     encoder = OneHotEncoder(sparse=False, categories='auto')
     y_cat = encoder.fit_transform(y)
 
