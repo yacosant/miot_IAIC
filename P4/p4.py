@@ -3,7 +3,7 @@ import copy
 from scipy.io import loadmat
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import OneHotEncoder
-import scipy.optimize as opt
+#import scipy.optimize as opt
 from scipy.optimize import minimize
 import math
 
@@ -12,6 +12,7 @@ from displayData import displayData
 
 
 def backprop(params, num_entradas, num_ocultas, num_etiquetas, X, y, l):
+    print("entra")
     m = X.shape[0]
     X = np.hstack((np.ones((m, 1)), X))
     y = np.matrix(y)
@@ -79,23 +80,29 @@ def forward_propagate(X, theta1, theta2):
     h = sigmoid(z3) # = a3 = g(z3)
 
     return a1, z2, a2, z3, h
+def sigmoid(x):
+    s = 1 / (1 + np.exp(-x))
+    return s
 
-def min_coste(num_entradas, num_ocultas, num_etiquetas, X, y, reg):
-	initialTheta1 = pesosAleatorios(num_entradas, num_ocultas)
-	initialTheta2 = pesosAleatorios(num_ocultas, num_etiquetas)
-	params_rn = np.concatenate((initialTheta1.ravel(), initialTheta2.ravel()))
-
-	result = opt.fmin_tnc(func=cost, x0=params_rn, fprime=gradiente, args=(num_entradas, num_ocultas, num_etiquetas, X, y, reg))
-	theta1 = np.reshape(result[0][:num_ocultas * (num_entradas + 1)], (num_ocultas, (num_entradas + 1)))
-	theta2 = np.reshape(result[0][num_ocultas * (num_entradas + 1):], (num_etiquetas, (num_ocultas + 1)))
-	return (theta1, theta2)
-
+def dSigmoid(z):
+    return np.multiply(sigmoid(z), (1 - sigmoid(z)))
 
 def pesosAleatorios(L_in, L_out):
 	e = math.sqrt(6) / math.sqrt(L_in + L_out)
 	pesos = 2 * e * np.random.rand(L_out, L_in + 1) - e
 	return pesos
 
+def min_coste(num_entradas, num_ocultas, num_etiquetas, X, y, reg):
+    initialTheta1 = pesosAleatorios(num_entradas, num_ocultas)
+    initialTheta2 = pesosAleatorios(num_ocultas, num_etiquetas)
+    params_rn = np.concatenate((initialTheta1.ravel(), initialTheta2.ravel()))
+    params = (np.random.random(size=num_ocultas * (num_entradas + 1) + num_etiquetas * (num_ocultas + 1)) - 0.5) * 0.25
+
+    result = minimize(fun=backprop, x0=params_rn, args=( num_entradas, num_ocultas, num_etiquetas, X, y,reg), method='TNC', jac=True, options={'maxiter':70})
+    print(result)
+    theta1 = np.reshape(result.x[:num_ocultas * (num_entradas + 1)], (num_ocultas, (num_entradas + 1)))
+    theta2 = np.reshape(result.x[num_ocultas * (num_entradas + 1):], (num_etiquetas, (num_ocultas + 1)))
+    return (theta1, theta2)
 
 def evaluar(h, y):
 	m = len(h.T)
@@ -105,12 +112,6 @@ def evaluar(h, y):
 			cont += 1
 	print('Acierta el {}%\n'.format((cont/m)*100))
 
-def sigmoid(x):
-    s = 1 / (1 + np.exp(-x))
-    return s
-
-def dSigmoid(z):
-    return np.multiply(sigmoid(z), (1 - sigmoid(z)))
 """
 def h(x, theta1, theta2):
 	z2 = np.dot(theta1, x.T)
@@ -141,7 +142,10 @@ def main():
     num_ocultas = 25
     num_etiquetas = 10
     l = 1
-   
+    
+    encoder = OneHotEncoder(sparse=False, categories='auto')
+    y_cat = encoder.fit_transform(y)
+    """
     init_epi1 = np.sqrt(6)/np.sqrt((num_entradas + 1) + (num_ocultas))
     init_epi2 = np.sqrt(6)/np.sqrt((num_ocultas + 1) + (num_etiquetas))
 
@@ -152,28 +156,15 @@ def main():
 
     theta_vec = np.concatenate((np.ravel(theta1), np.ravel(theta2)))
     theta_vec = theta_vec.reshape((len(theta_vec), 1))
-    #print(cost(theta_vec,num_entradas, num_ocultas, num_etiquetas, X, y_cat, l))
-    
     """
-    J, grad = backprop(theta_vec, num_entradas, num_ocultas, num_etiquetas, X, y_cat, l)
-    print(J)
-    print(grad.shape)
-    """
-    # minimize our cost function
-    """
-    res = minimize(fun=backprop, x0=theta_vec, args=( num_entradas, num_ocultas, num_etiquetas, X, y_cat, l), 
-                    method='TNC', jac=True, options={'maxiter': 5000})
-    print(res)
-    """
+    t1, t2= min_coste(num_entradas, num_ocultas, num_etiquetas, X, y_cat, l)
+    print(t1)
+    print(t2)
+    a1, z2, a2, z3, h = forward_propagate(X, t1, t2)
+    yPredecido = np.array(np.argmax(h, axis=1) + 1)
+    print(yPredecido)
 
 
-    """
-    theta1, theta2 = min_coste(len(X[0]) - 1, len(theta1), len(theta2), X, y_cat, 1)
-
-    print(theta1)
-    print(theta2)
-    evaluar(getH(X, theta1, theta2), y)
-    """
     
 def mainTest():
     weights = loadmat('ex4weights.mat')
@@ -187,32 +178,20 @@ def mainTest():
     num_etiquetas = 10
     l = 1
 
-    input_layer_size = 3
-    hidden_layer_size = 5
-    num_labels = 3
-
     X = np.hstack([np.ones((len(X), 1)), X])  # Le añade una columna de unos a las x
-    
     encoder = OneHotEncoder(sparse=False, categories='auto')
     y_cat = encoder.fit_transform(y)
 
     theta_vec = np.concatenate((np.ravel(theta1), np.ravel(theta2)))
     theta_vec = theta_vec.reshape((len(theta_vec), 1))
-    params_rn = np.concatenate((theta1.ravel(), theta2.ravel()))
-    #print(theta1.shape, theta2.shape, theta_vec.shape)
     print("COSTE:")
     print(cost(theta_vec,num_entradas, num_ocultas, num_etiquetas, X, y_cat, l))
     print("---")
-    """
-    res = minimize(fun=backprop, x0=params_rn, args=(num_entradas, num_ocultas, num_etiquetas, X, y_cat, l), 
-                method='TNC', jac=True, options={'maxiter': 5000})
-    print(res)
-    print("---")
-    """
 
-#main()
-a = checkNNGradients(backprop, 0)
-print(a)
+
 #mainTest()
+#a = checkNNGradients(backprop, 0)
+#print(a)
+main()
 
 
