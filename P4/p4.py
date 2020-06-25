@@ -123,18 +123,6 @@ def main():
     
     encoder = OneHotEncoder(sparse=False, categories='auto')
     y_cat = encoder.fit_transform(y)
-    """
-    init_epi1 = np.sqrt(6)/np.sqrt((num_entradas + 1) + (num_ocultas))
-    init_epi2 = np.sqrt(6)/np.sqrt((num_ocultas + 1) + (num_etiquetas))
-
-    theta1 = np.random.rand((num_ocultas), (num_entradas + 1)) * (2 * init_epi1) - init_epi1
-    theta2 = np.random.rand((num_etiquetas), (num_ocultas + 1)) * (2 * init_epi2) - init_epi2
-    theta_vec = np.concatenate((np.ravel(theta1), np.ravel(theta2)))
-    theta_vec = theta_vec.reshape((len(theta_vec), 1))
-
-    theta_vec = np.concatenate((np.ravel(theta1), np.ravel(theta2)))
-    theta_vec = theta_vec.reshape((len(theta_vec), 1))
-    """
     t1, t2= min_coste(num_entradas, num_ocultas, num_etiquetas, X, y_cat, l)
 
     X = np.hstack([np.ones((len(X), 1)), X])  
