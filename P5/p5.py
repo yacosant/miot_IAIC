@@ -183,14 +183,7 @@ def main():
     ############## Prueba para Xtest, ytest con lamda 3
     
     plotFit(Xtest, ytest, 8,1000,3)
-    """
-    m = np.shape(Xtest)[0]
-    ones = np.ones((m, 1))
-    Xtest = np.hstack((ones, Xtest))
-    m = np.shape(ytest)[0]
-    ones = np.ones((m, 1))
-    ytest = np.hstack((ones, ytest))
-    """
+
     Xtest_poly = polyFeatures(Xtest, 8)[0]
 
     #Normalizar
@@ -204,6 +197,7 @@ def main():
     res = minTheta(starting_theta,Xtest_poly, ytest, 3) 
     error_train = coste_regularizado(res, Xtest_poly, ytest, 3)
     print(error_train)
+    pintarcurvaAprendizaje(res, Xtest_poly, ytest, X_poly_val, yval,3)
    
 
     ##############
