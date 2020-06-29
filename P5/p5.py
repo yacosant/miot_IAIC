@@ -1,9 +1,7 @@
 import numpy as np
 from scipy.io import loadmat
 from scipy.optimize import minimize
-#import pandas as pd
 import matplotlib.pyplot as plt
-#import seaborn as sns
 
 def pintar(X, y, theta = np.array(([0],[0])), reg = 0):
     plt.figure(figsize=(12, 8))
@@ -101,10 +99,10 @@ def plotFit(X, y, degree, num_points, reg = 0):
     x_range_poly = polyFeatures(x_range_poly, len(starting_theta)-2)[0]
     y_range = x_range_poly @ opt_theta
     pintar(X, y)
-    plt.plot(x_range, y_range,  color = "blue", label = "Polynomial regression fit")
-    plt.title('Polynomial Regression Fit: No Regularization')
+    plt.plot(x_range, y_range,  color = "blue", label = "Ajuste de Regresión Polinómico")
+    plt.title('Ajuste de Regresión Polinómico: Sin Regularización')
     if reg != 0:
-        plt.title('Polynomial Regression Fit: Lambda = {0}'.format(reg))
+        plt.title('Ajuste de Regresión Polinómico: Lambda = {0}'.format(reg))
     plt.legend()
     plt.show()
 
@@ -113,8 +111,8 @@ def main():
     X, y, Xval, yval, Xtest, ytest = map(np.ravel, [dato['X'], dato['y'], dato['Xval'], dato['yval'], dato['Xtest'], dato['ytest']])
     X, Xval, Xtest = [np.insert(x.reshape(x.shape[0], 1), 0, np.ones(x.shape[0]), axis=1) for x in (X, Xval, Xtest)]
     
-    #pintar(X,y)
-    #plt.show()
+    pintar(X,y)
+    plt.show()
 
     ###############
     print("################")
@@ -160,17 +158,9 @@ def main():
     pintarcurvaAprendizaje(starting_theta, X_poly, y, X_poly_val, yval,100)
     
     ################ Descubrir valor optimo
-    m = np.shape(X_poly)[0]
-    ones = np.ones((m, 1))
-    Xpoly = np.hstack((ones, X_poly))
-    m = np.shape(X_poly_val)[0]
-    ones = np.ones((m, 1))
-    Xvalpoly = np.hstack((ones, X_poly_val))
-    
+
     landaList = [0, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3, 10]
     costeE, costeVal = [], []
-    #starting_theta = np.ones((X_poly.shape[1], 1))
-    #starting_theta = np.ones(np.shape(X_poly)[1])
     for l in landaList:
         res = minTheta(starting_theta,X_poly, y, l) 
         print("aqui res: "+str(res))
@@ -186,7 +176,8 @@ def main():
 
     Xtest_poly = polyFeatures(Xtest, 8)[0]
 
-    #Normalizar
+    #Normalizar 
+    #A partir de aquí, no me da lo esperado, por lo que me he ahorrado incluirlo en la memoria
     means = np.mean(X, axis=0)
     stds = np.std(X, axis = 0)
 
@@ -198,7 +189,6 @@ def main():
     error_train = coste_regularizado(res, Xtest_poly, ytest, 3)
     print(error_train)
     pintarcurvaAprendizaje(res, Xtest_poly, ytest, X_poly_val, yval,3)
-   
 
     ##############
 main()
