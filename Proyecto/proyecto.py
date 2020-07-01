@@ -8,6 +8,11 @@ import io
 import seaborn as sns
 from sklearn.model_selection import train_test_split
 
+from keras.models import Sequential
+from keras.layers import Dense
+
+
+
 def carga_csv(file_name):
     return read_csv(file_name, header=None).values
 
@@ -56,6 +61,19 @@ def pintar():
     countSexProblemas(data)
     countByEdad(data)
 
+def keras(X_train, X_test, Y_train, Y_test):
+    
+    model = Sequential()
+    model.add(Dense(30, input_dim=13, activation='tanh'))
+    model.add(Dense(20, activation='tanh'))
+    model.add(Dense(1, activation='sigmoid'))
+
+    model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['accuracy'])
+    model.fit(X_train, Y_train, epochs=100, verbose=1)
+    model.summary()
+    score = model.evaluate(X_test, Y_test, verbose=0)
+    print(score)
+    print('Model Accuracy = ',score[1])
 
 ############
 #data = carga_csv('./dataset.csv')
@@ -69,13 +87,20 @@ print(data.head(20))
 
 print("Media de edad: " + str(data['age'].mean()))
 
-Input_train, Input_test, Target_train, Target_test = train_test_split(data, data['target'], test_size = 0.30, stratify= data['target'], random_state = 5)
-print(Input_train.shape)
-print(Input_test.shape)
-print(Target_train.shape)
-print(Target_test.shape)
-print("---------")
+y = data.target.values
+X_data = data.drop(['target'], axis = 1)
+# Normalize
+#X_data = (X_data - np.min(X_data)) / (np.max(X_data) - np.min(X_data)).values
 
+
+X_train, X_test, Y_train, Y_test = train_test_split(X_data, y, test_size = 0.30, stratify= data['target'], random_state = 5)
+print(X_train.shape)
+print(X_test.shape)
+print(Y_train.shape)
+print(Y_test.shape)
+print("---------")
+#X_train=X_train.T
+print(X_train.shape)
 """
 print(Input_train['target'].mean())
 print(Input_test['target'].mean())
@@ -90,3 +115,5 @@ OUT:
 """
 
 #x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=42)
+
+keras(X_train, X_test, Y_train, Y_test)
