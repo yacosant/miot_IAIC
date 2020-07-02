@@ -1,4 +1,5 @@
 import numpy as np
+import helper as help
 import copy
 import pandas as pd
 from pandas.io.parsers import read_csv
@@ -15,7 +16,8 @@ from keras.models import Sequential
 from keras.layers import Dense
 
 options = ["[0] - Salir", "[1] - Generar Gráficas", "[2] - Mostrar información de la muestra", "[3] - Mostrar elementos de la muestra","[4] - Ejecución:[Sklearn]Regresión Logistica", "[5] - Ejecución: [Keras]"]
-
+nombres =["Sklearns-RegresionLogistica", "Keras-basic"]
+ejecuciones ={}
 
 def carga_csv(file_name):
     return read_csv(file_name, header=None).values
@@ -102,13 +104,22 @@ def prepararData(data):
     """
     return X_train, X_test, Y_train, Y_test
 
+def compararAciertos():
+    print(ejecuciones) #debug
+    sns.set_style("whitegrid")
+    plt.figure(figsize=(16,5))
+    plt.yticks(np.arange(0,100,10))
+    plt.ylabel("% de Acierto")
+    plt.xlabel("Ejecuciones")
+    sns.barplot(x=list(ejecuciones.keys()), y=list(ejecuciones.values()))
+    plt.show()
+
 def sklearnLogisticRegression(X_train, X_test, Y_train, Y_test, graf = False):
-    #accuracies = {}
     model = LogisticRegression(solver='liblinear')
     model.fit(X_train,Y_train)
     acc = model.score(X_test,Y_test)*100
 
-    #accuracies['Logistic Regression'] = acc
+    ejecuciones['Sklearns-RegresionLogistica'] = acc
     print("Acierto: "+str(acc)+" %")
 
 def keras(X_train, X_test, Y_train, Y_test, model = 0, graf = False):
@@ -117,14 +128,18 @@ def keras(X_train, X_test, Y_train, Y_test, model = 0, graf = False):
         model.add(Dense(30, input_dim=13, activation='tanh'))
         model.add(Dense(20, activation='tanh'))
         model.add(Dense(1, activation='sigmoid'))
-
-    model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['accuracy'])
-    model.fit(X_train, Y_train, epochs=100, verbose=1)
-    model.summary()
+        model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['acc'])
+    
+    history = model.fit(X_train, Y_train, epochs=100, verbose=1)
+    
+    #model.summary()
     score = model.evaluate(X_test, Y_test, verbose=0)
-    print(score)
-    print("Acierto: " +str(score[1]*100)+" %")
-
+    acc=score[1]*100
+    ejecuciones['Keras-basic'] = acc
+    print("Acierto: " +str(acc)+" %")
+    help.plot_loss_accuracy(history)
+    help.plot_confusion_matrix(model, X_train, Y_train)
+    
 
 def main():
     os.environ['KMP_WARNINGS'] = '0' #Desactiva logs de INFO de keras si se pone a 0 cuando no se usan
@@ -175,13 +190,13 @@ def main():
 #data = carga_csv('./dataset.csv')
 #print(data)
 data = cargar()
-print(data.head(20))
+#print(data.head(20))
 #print(data.count())#303 casos
 #pintar()
 
 #print(data.loc[data['age'] == 29])
 
-print("Media de edad: " + str(data['age'].mean()))
+#print("Media de edad: " + str(data['age'].mean()))
 
 X_train, X_test, Y_train, Y_test= prepararData(data)
 
@@ -198,11 +213,24 @@ OUT:
 0.5494505494505495
 """
 
-sklearnLogisticRegression(X_train, X_test, Y_train, Y_test)
+#sklearnLogisticRegression(X_train, X_test, Y_train, Y_test)
 
-#keras(X_train, X_test, Y_train, Y_test)
+ejecuciones['Prueba']=95
+
+keras(X_train, X_test, Y_train, Y_test)
+compararAciertos()
+
+
 """
     Model Accuracy =  0.7362637519836426 SIN NORMALIZAR
     Model Accuracy =  0.8351648449897766 NORMALIZADO
 """
 
+
+"""
+class Producto:
+    def __init__(self, nombre, precio):
+        self.nombre = nombre
+        self.precio = precio
+
+"""
