@@ -8,12 +8,13 @@ import io
 import os
 import seaborn as sns
 from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
 from termcolor import colored
 
 from keras.models import Sequential
 from keras.layers import Dense
 
-options = ["[0] - Salir", "[1] - Generar Gráficas", "[2] - Mostrar información de la muestra", "[3] - Mostrar elementos de la muestra","[4] - Ejecución: Manera tradicional", "[5] - Ejecución: Keras"]
+options = ["[0] - Salir", "[1] - Generar Gráficas", "[2] - Mostrar información de la muestra", "[3] - Mostrar elementos de la muestra","[4] - Ejecución:[Sklearn]Regresión Logistica", "[5] - Ejecución: [Keras]"]
 
 
 def carga_csv(file_name):
@@ -82,24 +83,53 @@ def pintar(data):
     countSexProblemas(data)
     countByEdad(data)
 
-def keras(X_train, X_test, Y_train, Y_test):
-    
-    model = Sequential()
-    model.add(Dense(30, input_dim=13, activation='tanh'))
-    model.add(Dense(20, activation='tanh'))
-    model.add(Dense(1, activation='sigmoid'))
+def prepararData(data):
+    y = data.target.values
+    X_data = data.drop(['target'], axis = 1)
+    # Normalize
+    X_data = (X_data - np.min(X_data)) / (np.max(X_data) - np.min(X_data)).values
+
+
+    X_train, X_test, Y_train, Y_test = train_test_split(X_data, y, test_size = 0.30, stratify= data['target'], random_state = 5)
+    """
+    print(X_train.shape)
+    print(X_test.shape)
+    print(Y_train.shape)
+    print(Y_test.shape)
+    print("---------")
+    #X_train=X_train.T
+    print(X_train.shape)
+    """
+    return X_train, X_test, Y_train, Y_test
+
+def sklearnLogisticRegression(X_train, X_test, Y_train, Y_test, graf = False):
+    #accuracies = {}
+    model = LogisticRegression(solver='liblinear')
+    model.fit(X_train,Y_train)
+    acc = model.score(X_test,Y_test)*100
+
+    #accuracies['Logistic Regression'] = acc
+    print("Acierto: "+str(acc)+" %")
+
+def keras(X_train, X_test, Y_train, Y_test, model = 0, graf = False):
+    if model == 0:
+        model = Sequential()
+        model.add(Dense(30, input_dim=13, activation='tanh'))
+        model.add(Dense(20, activation='tanh'))
+        model.add(Dense(1, activation='sigmoid'))
 
     model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['accuracy'])
     model.fit(X_train, Y_train, epochs=100, verbose=1)
     model.summary()
     score = model.evaluate(X_test, Y_test, verbose=0)
     print(score)
-    print('Model Accuracy = ',score[1])
+    print("Acierto: " +str(score[1]*100)+" %")
 
 
 def main():
     os.environ['KMP_WARNINGS'] = '0' #Desactiva logs de INFO de keras si se pone a 0 cuando no se usan
     data = cargar()
+    X_train, X_test, Y_train, Y_test= prepararData(data)
     
     while True:
         menu()
@@ -119,10 +149,20 @@ def main():
                 print(data.head(num))
             else: print(colored("El número no es correcto", "red"))
 
-        elif op==4:
+        elif op==4: #Sklearn
             print("")
-        elif op==5:
+            sklearnLogisticRegression(X_train, X_test, Y_train, Y_test)
+        
+        elif op==5: #Keras 
             print("")
+            keras(X_train, X_test, Y_train, Y_test, 0, True)
+
+        elif op==6: #Ejecutar todos 
+            print("")
+        
+        elif op==7: #Comparar graficas 
+            print("")
+
         elif op==0:
             break
         else:
@@ -130,7 +170,7 @@ def main():
 
 
 
-main()  
+#main()  
 ############
 #data = carga_csv('./dataset.csv')
 #print(data)
@@ -143,20 +183,8 @@ print(data.head(20))
 
 print("Media de edad: " + str(data['age'].mean()))
 
-y = data.target.values
-X_data = data.drop(['target'], axis = 1)
-# Normalize
-X_data = (X_data - np.min(X_data)) / (np.max(X_data) - np.min(X_data)).values
+X_train, X_test, Y_train, Y_test= prepararData(data)
 
-
-X_train, X_test, Y_train, Y_test = train_test_split(X_data, y, test_size = 0.30, stratify= data['target'], random_state = 5)
-print(X_train.shape)
-print(X_test.shape)
-print(Y_train.shape)
-print(Y_test.shape)
-print("---------")
-#X_train=X_train.T
-print(X_train.shape)
 """
 print(Input_train['target'].mean())
 print(Input_test['target'].mean())
@@ -170,7 +198,7 @@ OUT:
 0.5494505494505495
 """
 
-#x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=42)
+sklearnLogisticRegression(X_train, X_test, Y_train, Y_test)
 
 #keras(X_train, X_test, Y_train, Y_test)
 """
