@@ -11,13 +11,14 @@ import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from termcolor import colored
-
+from keras.optimizers import Adam#########
 from keras.models import Sequential
 from keras.layers import Dense
 
-options = ["[0] - Salir", "[1] - Generar Gráficas", "[2] - Mostrar información de la muestra", "[3] - Mostrar elementos de la muestra","[4] - Ejecución:[Sklearn]Regresión Logistica", "[5] - Ejecución: [Keras]"]
+options = ["[0] - Salir", "[1] - Generar Gráficas", "[2] - Mostrar información de la muestra", "[3] - Mostrar elementos de la muestra","[4] - Ejecución:[Sklearn] Regresión Logistica", "[5] - Ejecución: [Keras-basic]"]
 nombres =["Sklearns-RegresionLogistica", "Keras-basic"]
 ejecuciones ={}
+historicos ={}
 
 def carga_csv(file_name):
     return read_csv(file_name, header=None).values
@@ -109,7 +110,7 @@ def compararAciertos():
     sns.set_style("whitegrid")
     plt.figure(figsize=(16,5))
     plt.yticks(np.arange(0,100,10))
-    plt.ylabel("% de Acierto")
+    plt.ylabel("% de Presición")
     plt.xlabel("Ejecuciones")
     sns.barplot(x=list(ejecuciones.keys()), y=list(ejecuciones.values()))
     plt.show()
@@ -120,9 +121,9 @@ def sklearnLogisticRegression(X_train, X_test, Y_train, Y_test, graf = False):
     acc = model.score(X_test,Y_test)*100
 
     ejecuciones['Sklearns-RegresionLogistica'] = acc
-    print("Acierto: "+str(acc)+" %")
+    print(colored("Precisión: " +str(acc)+" %", "blue"))
 
-def keras(X_train, X_test, Y_train, Y_test, model = 0, graf = False):
+def keras(X_train, X_test, Y_train, Y_test, model = 0, graf = True, name='Keras-basic'):
     if model == 0:
         model = Sequential()
         model.add(Dense(30, input_dim=13, activation='tanh'))
@@ -130,15 +131,25 @@ def keras(X_train, X_test, Y_train, Y_test, model = 0, graf = False):
         model.add(Dense(1, activation='sigmoid'))
         model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['acc'])
     
-    history = model.fit(X_train, Y_train, epochs=100, verbose=1)
-    
+    #history = model.fit(X_train, Y_train, epochs=200, verbose=2)
+    history = model.fit(X_train, Y_train, validation_data=(X_test, Y_test), epochs=100, verbose=2)
+    historicos[name]= history
     #model.summary()
     score = model.evaluate(X_test, Y_test, verbose=0)
     acc=score[1]*100
     ejecuciones['Keras-basic'] = acc
-    print("Acierto: " +str(acc)+" %")
+    #print(colored("Presición entrenamiento: " +str(history.history['acc'])+" %", "blue"))
+    print(colored("Presición test: " +str(acc)+" %", "blue"))
     help.plot_loss_accuracy(history)
+    plt.savefig('history-'+name+'.png')
+    if graf == True:
+        plt.show()
     help.plot_confusion_matrix(model, X_train, Y_train)
+    plt.savefig('confusion_matrix-'+name+'.png')
+    if graf == True:
+        plt.show()
+    
+        
     
 
 def main():
@@ -156,7 +167,8 @@ def main():
             pintar(data)
 
         elif op==2:
-            print(data.info())
+            print(data.describe())
+            
 
         elif op==3:
             num= int(input("¿Cuantos elementos quieres recuperar? (1-303): "))
@@ -168,24 +180,118 @@ def main():
             print("")
             sklearnLogisticRegression(X_train, X_test, Y_train, Y_test)
         
-        elif op==5: #Keras 
-            print("")
-            keras(X_train, X_test, Y_train, Y_test, 0, True)
+        elif op==5: #Keras Basic
+            print(colored("Keras con 3 capas densas:", "red"))
+            print(colored("Nodos: [30-tanh][20-tanh][1-sigmoid]", "red"))
+            print(colored("Optimizador [adam] | Loss [binary_crossentropy]", "red"))
+            ok = input("Pulsa enter para ejecutar (o escribe otra cosa para no ejecutarlo) >>> ")
+            if ok == '':
+                keras(X_train, X_test, Y_train, Y_test, 0, True)
+            else: print("No ejecutado")
 
-        elif op==6: #Ejecutar todos 
-            print("")
+        elif op==6: #Keras 
+            print(colored("Keras con 4 capas densas:", "red"))
+            print(colored("Nodos: [30-tanh][20-tanh][1-sigmoid][1-sigmoid]", "red"))
+            print(colored("Optimizador [adam] | Loss [binary_crossentropy]", "red"))
+            ok = input("Pulsa enter para ejecutar (o escribe otra cosa para no ejecutarlo) >>> ")
+            if ok == '':
+                model = Sequential()
+                model.add(Dense(30, input_dim=13, activation='sigmoid'))
+                model.add(Dense(20, activation='tanh'))
+                model.add(Dense(10, activation='sigmoid'))
+                model.add(Dense(1, activation='tanh'))
+                #.add(Dense(1, activation='sigmoid'))
+                model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['acc'])
+
+                keras(X_train, X_test, Y_train, Y_test, model, True,"k6")
+            else: print("No ejecutado")
         
-        elif op==7: #Comparar graficas 
+        elif op==7: #keras
+            print("")
+            model = Sequential()
+            """"
+            model.add(Dense(200, input_dim=13, activation='relu'))
+            model.add(Dense(150, activation='relu'))
+            model.add(Dense(100, activation='relu'))
+            model.add(Dense(50, activation='tanh'))
+            model.add(Dense(1, activation='sigmoid'))
+            """
+            """
+            print("(1) - [4-tanh]-[2-tanh]-[10-softmax]")
+            print("(2) - [64-tanh]-[32-tanh]-[16-softmax]-[10-softmax]")
+            print("(3) - [64-tanh]-[32-tanh]-[16-softmax]-[10-sigmoid]")
+            print("(4) - [64-tanh]-[32-tanh]-[16-tanh]-[10-sigmoid]")
+            print("(5) - [64-tanh]-[32-tanh]-[16-tanh]-[10-softmax]")
+            print("(6) - [128-tanh]-[64-tanh]-[32-tanh]-[10-softmax]")
+            """
+            """
+            model.add(Dense(4, input_dim=13, activation='tanh'))
+            model.add(Dense(2, activation='tanh'))
+            model.add(Dense(1, activation='softmax'))
+            54.94505763053894 %
+            """
+            """
+            model.add(Dense(64, input_dim=13, activation='tanh'))
+            model.add(Dense(32, activation='tanh'))
+            model.add(Dense(16, activation='softmax'))
+            model.add(Dense(1, activation='softmax'))
+            Presición: 54.94505763053894 %
+            """
+            """
+            model.add(Dense(64, input_dim=13, activation='tanh'))
+            model.add(Dense(32, activation='tanh'))
+            model.add(Dense(16, activation='softmax'))
+            model.add(Dense(1, activation='sigmoid'))
+            Presición: 76.92307829856873 %
+            """
+            """
+            model.add(Dense(64, input_dim=13, activation='tanh'))
+            model.add(Dense(32, activation='tanh'))
+            model.add(Dense(16, activation='tanh'))
+            model.add(Dense(1, activation='sigmoid'))
+            Presición: 74.72527623176575 %
+            """
+
+            """
+            model.add(Dense(64, input_dim=13, activation='tanh'))
+            model.add(Dense(32, activation='tanh'))
+            model.add(Dense(16, activation='tanh'))
+            model.add(Dense(1, activation='softmax'))
+            Presición: 54.94505763053894 %
+            """
+
+            model = Sequential()
+            model.add(Dense(300, input_dim=13, activation='tanh'))
+            model.add(Dense(200, activation='tanh'))
+            model.add(Dense(1, activation='sigmoid'))
+            model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['acc'])
+
+            keras(X_train, X_test, Y_train, Y_test, model, True,"k7")
+
+        elif op==8: #Ejecutar todos 
+            print("")
+            model = Sequential()
+            model.add(Dense(50, input_dim=13, activation='sigmoid'))
+            #model.add(Dense(100, activation='tanh'))
+            model.add(Dense(10, activation='sigmoid'))
+            model.add(Dense(200, activation='tanh'))
+            model.add(Dense(1, activation='sigmoid'))
+            model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['acc'])
+
+            keras(X_train, X_test, Y_train, Y_test, model, True,"k8")
+
+        elif op==9: #Comparar graficas 
             print("")
 
         elif op==0:
+            print("Saliendo...")
             break
         else:
             print (colored("La opción elegida no es correcta...\n","red"))
 
 
 
-#main()  
+main()  
 ############
 #data = carga_csv('./dataset.csv')
 #print(data)
