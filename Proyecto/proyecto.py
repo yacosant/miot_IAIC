@@ -10,12 +10,13 @@ import os
 import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import confusion_matrix
 from termcolor import colored
 from keras.optimizers import Adam#########
 from keras.models import Sequential
 from keras.layers import Dense
 
-options = ["[0] - Salir", "[1] - Generar Gráficas", "[2] - Mostrar información de la muestra", "[3] - Mostrar elementos de la muestra","[4] - Ejecución:[Manual]  Regresión Logistica" ,"[5] - Ejecución:[Sklearn] Regresión Logistica", "[6] - Ejecución:[Keras1]  [64-tanh][32-tanh][16-tanh][1-softmax]", "[7] - Ejecución:[Keras2]  [4-tanh][2-tanh][1-sigmoid]", "[8] - Ejecución:[Keras3]  [30-tanh][20-tanh][1-sigmoid]", "[9] - Ejecución:[Keras4]  [50-sigmoid][10-sigmoid][200-tanh][1-sigmoid] - ¡MEJOR!", "[10] - Ejecutar y comparar todas:[Graficas de Precisión y de Confusión]"]
+options = ["[0] - Salir", "[1] - Generar Gráficas de la muestra", "[2] - Mostrar información de la muestra", "[3] - Mostrar elementos de la muestra","[4] - Ejecución:[Manual]  Regresión Logistica" ,"[5] - Ejecución:[Sklearn] Regresión Logistica", "[6] - Ejecución:[Keras1]  [64-tanh][32-tanh][16-tanh][1-softmax]", "[7] - Ejecución:[Keras2]  [4-tanh][2-tanh][1-sigmoid]", "[8] - Ejecución:[Keras3]  [30-tanh][20-tanh][1-sigmoid]", "[9] - Ejecución:[Keras4]  [50-sigmoid][10-sigmoid][200-tanh][1-sigmoid] - ¡MEJOR!", "[10] - Ejecutar y comparar todas:[Graficas de Precisión y de Confusión]"]
 nombres =["Sklearns-RegresionLogistica", "Keras-basic"]
 ejecuciones ={}
 confusiones ={}
@@ -237,7 +238,7 @@ def predict(weight,bias,x_test):
 """
 
 
-def logistic_regression(x_train,y_train,x_test,y_test,learningRate,iteration):
+def logistic_regression(x_train,y_train,x_test,y_test,learningRate,iteration, graf = True):
     dimension = x_train.shape[0]
     #weight,bias = initialize(dimension)
     weight= initialize(dimension)
@@ -247,6 +248,12 @@ def logistic_regression(x_train,y_train,x_test,y_test,learningRate,iteration):
 
     #y_prediction = predict(parameters["weight"],parameters["bias"],x_test)
     y_prediction = predict(parameters["weight"],x_test)
+    conf =pd.DataFrame(confusion_matrix(y_test, y_prediction.T))
+    confusiones['Logic-regresion-manual'] = conf
+    if graf == True:
+        plt.figure(figsize=(8, 6))
+        sns.heatmap(conf, annot=True, fmt='d',cmap='YlGnBu', alpha=0.8, vmin=0)
+        plt.show()
 
     acc =(100 - np.mean(np.abs(y_prediction - y_test))*100)
     ejecuciones['Logic-regresion-manual'] = acc
@@ -254,13 +261,21 @@ def logistic_regression(x_train,y_train,x_test,y_test,learningRate,iteration):
 
 ########################################################
 
-def sklearnLogisticRegression(X_train, X_test, Y_train, Y_test, graf = False):
+def sklearnLogisticRegression(X_train, X_test, Y_train, Y_test, graf = True):
     model = LogisticRegression(solver='liblinear')
     model.fit(X_train,Y_train)
     acc = model.score(X_test,Y_test)*100
-
     ejecuciones['Sklearns-RegresionLogistica'] = acc
+
+    y_pred = model.predict(X_test)
+    conf =pd.DataFrame(confusion_matrix(Y_test, y_pred))
+    confusiones['Sklearns-RegresionLogistica'] = conf
     print(colored("Precisión: " +str(acc)+" %", "blue"))
+    if graf == True:
+        plt.figure(figsize=(8, 6))
+        sns.heatmap(conf, annot=True, fmt='d',cmap='YlGnBu', alpha=0.8, vmin=0)
+        plt.show()
+    
 
 def keras(X_train, X_test, Y_train, Y_test, model = 0, graf = True, name='Keras-basic'):
     if model == 0:
@@ -413,23 +428,21 @@ def main():
                 model.add(Dense(1, activation='sigmoid'))
                 model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['acc'])
 
-                keras(X_train, X_test, Y_train, Y_test, model, True,"Keras-3")
+                keras(X_train, X_test, Y_train, Y_test, model, True,"Keras-4")
             else: print("No ejecutado")
-
-        elif op==11: #Ejecutar todos 
-            print("")
-            model = Sequential()
-            model.add(Dense(50, input_dim=13, activation='sigmoid'))
-            #model.add(Dense(100, activation='tanh'))
-            model.add(Dense(10, activation='sigmoid'))
-            model.add(Dense(200, activation='tanh'))
-            model.add(Dense(1, activation='sigmoid'))
-            model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['acc'])
-
-            keras(X_train, X_test, Y_train, Y_test, model, True,"k8")
-
+       
         elif op==10: #Comparar graficas de historicos y de Matris de confusión
-            print("")
+            print(colored("Se van a ejecutar todos los modelos, y a continuación se mostrará la comparación de gráficas", "red"))
+            print(colored("[Grafica de Matriz de Confusión]", "red"))
+            print(colored("[Grafica de Presición bhistorica]", "red"))
+            ok = input("Pulsa enter para ejecutar (o escribe otra cosa para no ejecutarlo) >>> ")
+            if ok == '':
+                
+
+
+
+
+            else: print("No ejecutado")
             compararModelosConfusion()
             compararModelosHistoricos()
 
