@@ -15,10 +15,12 @@ from keras.optimizers import Adam#########
 from keras.models import Sequential
 from keras.layers import Dense
 
-options = ["[0] - Salir", "[1] - Generar Gráficas", "[2] - Mostrar información de la muestra", "[3] - Mostrar elementos de la muestra","[4] - Ejecución:[Sklearn] Regresión Logistica", "[5] - Ejecución: [Keras-basic]"]
+options = ["[0] - Salir", "[1] - Generar Gráficas", "[2] - Mostrar información de la muestra", "[3] - Mostrar elementos de la muestra","[4] - Ejecución:[Manual]  Regresión Logistica" ,"[5] - Ejecución:[Sklearn] Regresión Logistica", "[6] - Ejecución:[Keras1]  [64-tanh][32-tanh][16-tanh][1-softmax]", "[7] - Ejecución:[Keras2]  [4-tanh][2-tanh][1-sigmoid]", "[8] - Ejecución:[Keras3]  [30-tanh][20-tanh][1-sigmoid]", "[9] - Ejecución:[Keras4]  [50-sigmoid][10-sigmoid][200-tanh][1-sigmoid] - ¡MEJOR!", "[10] - Ejecutar y comparar todas:[Graficas de Precisión y de Confusión]"]
 nombres =["Sklearns-RegresionLogistica", "Keras-basic"]
 ejecuciones ={}
+confusiones ={}
 historicos ={}
+nombres = []
 
 def carga_csv(file_name):
     return read_csv(file_name, header=None).values
@@ -115,6 +117,143 @@ def compararAciertos():
     sns.barplot(x=list(ejecuciones.keys()), y=list(ejecuciones.values()))
     plt.show()
 
+###################Regresion logistica manual
+
+def initialize(dimension):
+    
+    weight = np.full((dimension,1),0.01)
+    #bias = 0.0
+    return weight#,bias
+
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+
+def forwardBackward(weight,x_train,y_train):
+    # Forward
+    y_head = sigmoid(np.dot(weight.T,x_train))
+    loss = -(y_train*np.log(y_head) + (1-y_train)*np.log(1-y_head))
+    cost = np.sum(loss) / x_train.shape[1]
+    
+    # Backward
+    derivative_weight = np.dot(x_train,((y_head-y_train).T))/x_train.shape[1]
+       
+    return cost,derivative_weight
+
+    """
+def forwardBackward(weight,bias,x_train,y_train):
+    # Forward
+    
+    y_head = sigmoid(np.dot(weight.T,x_train) + bias)
+    loss = -(y_train*np.log(y_head) + (1-y_train)*np.log(1-y_head))
+    cost = np.sum(loss) / x_train.shape[1]
+    
+    # Backward
+    derivative_weight = np.dot(x_train,((y_head-y_train).T))/x_train.shape[1]
+    derivative_bias = np.sum(y_head-y_train)/x_train.shape[1]
+    gradients = {"Derivative Weight" : derivative_weight, "Derivative Bias" : derivative_bias}
+    
+    return cost,gradients
+    """
+
+
+def update(weight,x_train,y_train,learningRate,iteration) :
+    costList = []
+    index = []
+    
+    #for each iteration, update weight values
+    for i in range(iteration):
+        cost,derivative_weight = forwardBackward(weight,x_train,y_train)
+        weight = weight - learningRate * derivative_weight
+        
+        costList.append(cost)
+        index.append(i)
+
+    parameters = {"weight": weight}
+    
+    print("iteration:",iteration)
+    print("cost:",cost)
+
+    """
+    plt.plot(index,costList)
+    plt.xlabel("Number of Iteration")
+    plt.ylabel("Cost")
+    plt.show()
+    """
+    return parameters, derivative_weight
+"""
+def update(weight,bias,x_train,y_train,learningRate,iteration) :
+    costList = []
+    index = []
+    
+    #for each iteration, update weight and bias values
+    for i in range(iteration):
+        cost,gradients = forwardBackward(weight,bias,x_train,y_train)
+        weight = weight - learningRate * gradients["Derivative Weight"]
+        bias = bias - learningRate * gradients["Derivative Bias"]
+        
+        costList.append(cost)
+        index.append(i)
+
+    parameters = {"weight": weight,"bias": bias}
+    
+    print("iteration:",iteration)
+    print("cost:",cost)
+
+    plt.plot(index,costList)
+    plt.xlabel("Number of Iteration")
+    plt.ylabel("Cost")
+    plt.show()
+
+    return parameters, gradients
+"""
+
+def predict(weight,x_test):
+    z = np.dot(weight.T,x_test) 
+    y_head = sigmoid(z)
+
+    y_prediction = np.zeros((1,x_test.shape[1]))
+    
+    for i in range(y_head.shape[1]):
+        if y_head[0,i] <= 0.5:
+            y_prediction[0,i] = 0
+        else:
+            y_prediction[0,i] = 1
+    return y_prediction
+
+"""
+def predict(weight,bias,x_test):
+    z = np.dot(weight.T,x_test) + bias
+    y_head = sigmoid(z)
+
+    y_prediction = np.zeros((1,x_test.shape[1]))
+    
+    for i in range(y_head.shape[1]):
+        if y_head[0,i] <= 0.5:
+            y_prediction[0,i] = 0
+        else:
+            y_prediction[0,i] = 1
+    return y_prediction
+"""
+
+
+def logistic_regression(x_train,y_train,x_test,y_test,learningRate,iteration):
+    dimension = x_train.shape[0]
+    #weight,bias = initialize(dimension)
+    weight= initialize(dimension)
+    
+    #parameters, gradients = update(weight,bias,x_train,y_train,learningRate,iteration)
+    parameters, derivative_weight = update(weight,x_train,y_train,learningRate,iteration)
+
+    #y_prediction = predict(parameters["weight"],parameters["bias"],x_test)
+    y_prediction = predict(parameters["weight"],x_test)
+
+    acc =(100 - np.mean(np.abs(y_prediction - y_test))*100)
+    ejecuciones['Logic-regresion-manual'] = acc
+    print(colored("Precisión Test: " +str(acc)+" %", "blue"))
+
+########################################################
+
 def sklearnLogisticRegression(X_train, X_test, Y_train, Y_test, graf = False):
     model = LogisticRegression(solver='liblinear')
     model.fit(X_train,Y_train)
@@ -134,22 +273,53 @@ def keras(X_train, X_test, Y_train, Y_test, model = 0, graf = True, name='Keras-
     #history = model.fit(X_train, Y_train, epochs=200, verbose=2)
     history = model.fit(X_train, Y_train, validation_data=(X_test, Y_test), epochs=100, verbose=2)
     historicos[name]= history
+    nombres.append(name)
     #model.summary()
     score = model.evaluate(X_test, Y_test, verbose=0)
     acc=score[1]*100
-    ejecuciones['Keras-basic'] = acc
+    ejecuciones[name] = acc
     #print(colored("Presición entrenamiento: " +str(history.history['acc'])+" %", "blue"))
     print(colored("Presición test: " +str(acc)+" %", "blue"))
     help.plot_loss_accuracy(history)
     plt.savefig('history-'+name+'.png')
     if graf == True:
         plt.show()
-    help.plot_confusion_matrix(model, X_train, Y_train)
+    confusiones[name] = help.plot_confusion_matrix(model, X_train, Y_train)
     plt.savefig('confusion_matrix-'+name+'.png')
     if graf == True:
         plt.show()
     
+def compararModelosConfusion():
+    plt.figure(figsize=(24,12))
+    plt.suptitle("Comparación Matrices de Confusión",fontsize=24)
+    plt.subplots_adjust(wspace = 0.4, hspace= 0.4)
+
+    tam=len(confusiones)
+    for i in range(tam):
+        plt.subplot(2,3,i+1)
+        plt.title(nombres[i])
+        sns.heatmap(confusiones[nombres[i]],annot=True,cmap="Blues",fmt="d",cbar=False, annot_kws={"size": 24})
+    plt.show()
+
+
+def compararModelosHistoricos():
+    plt.figure(figsize=(24,12))
+    plt.suptitle("Comparación Historicos",fontsize=24)
+    plt.subplots_adjust(wspace = 0.4, hspace= 0.4)
+
+    tam=len(historicos)
+    for i in range(tam):
+        plt.subplot(2,3,i+1)
+        #plt.title(nombres[i])
         
+        historydf = pd.DataFrame(historicos[nombres[i]].history, index=historicos[nombres[i]].epoch)
+        plt.plot(ylim=(0, max(1, historydf.values.max())))
+        plt.plot(historydf)
+        loss = historicos[nombres[i]].history['loss'][-1]
+        acc = historicos[nombres[i]].history['acc'][-1]
+        plt.title(nombres[i] +'- Loss: '+ str(loss)+', Accuracy: '+str(acc))
+    plt.show()
+ 
     
 
 def main():
@@ -176,99 +346,77 @@ def main():
                 print(data.head(num))
             else: print(colored("El número no es correcto", "red"))
 
-        elif op==4: #Sklearn
+        elif op==4: #Regresion lineal manual
+            x_train = X_train.T
+            y_train = Y_train.T
+            x_test = X_test.T
+            y_test = Y_test.T
+            logistic_regression(x_train, y_train, x_test, y_test,1,100)
+
+        elif op==5: #Sklearn
             print("")
+            print(colored("[Presición aprox: 79.12 %]", "red"))
             sklearnLogisticRegression(X_train, X_test, Y_train, Y_test)
         
-        elif op==5: #Keras Basic
-            print(colored("Keras con 3 capas densas:", "red"))
-            print(colored("Nodos: [30-tanh][20-tanh][1-sigmoid]", "red"))
-            print(colored("Optimizador [adam] | Loss [binary_crossentropy]", "red"))
-            ok = input("Pulsa enter para ejecutar (o escribe otra cosa para no ejecutarlo) >>> ")
-            if ok == '':
-                keras(X_train, X_test, Y_train, Y_test, 0, True)
-            else: print("No ejecutado")
-
-        elif op==6: #Keras 
+        elif op==6: #Keras Basic -Presición: 54.95 %
             print(colored("Keras con 4 capas densas:", "red"))
-            print(colored("Nodos: [30-tanh][20-tanh][1-sigmoid][1-sigmoid]", "red"))
+            print(colored("Nodos: [64-tanh][32-tanh][16-tanh][1-softmax]", "red"))
             print(colored("Optimizador [adam] | Loss [binary_crossentropy]", "red"))
+            print(colored("[Presición aprox: 54.95 %]", "red"))
             ok = input("Pulsa enter para ejecutar (o escribe otra cosa para no ejecutarlo) >>> ")
             if ok == '':
                 model = Sequential()
-                model.add(Dense(30, input_dim=13, activation='sigmoid'))
-                model.add(Dense(20, activation='tanh'))
-                model.add(Dense(10, activation='sigmoid'))
-                model.add(Dense(1, activation='tanh'))
-                #.add(Dense(1, activation='sigmoid'))
+                model.add(Dense(64, input_dim=13, activation='tanh'))
+                model.add(Dense(32, activation='tanh'))
+                model.add(Dense(16, activation='tanh'))
+                model.add(Dense(1, activation='softmax'))
                 model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['acc'])
+                keras(X_train, X_test, Y_train, Y_test, model, True, "Keras-1")
+            else: print("No ejecutado")
 
-                keras(X_train, X_test, Y_train, Y_test, model, True,"k6")
+        elif op==7: #Keras Presición: 78.02 %
+            print(colored("Keras con 3 capas densas:", "red"))
+            print(colored("Nodos: [4-tanh][2-tanh][1-sigmoid]", "red"))
+            print(colored("Optimizador [adam] | Loss [binary_crossentropy]", "red"))
+            print(colored("[Presición aprox: 78.02 %]", "red"))
+            ok = input("Pulsa enter para ejecutar (o escribe otra cosa para no ejecutarlo) >>> ")
+            if ok == '':
+                model = Sequential()
+                model.add(Dense(4, input_dim=13, activation='tanh'))
+                model.add(Dense(2, activation='tanh'))
+                model.add(Dense(1, activation='sigmoid'))
+                model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['acc'])
+                keras(X_train, X_test, Y_train, Y_test, model, True, "Keras-2")
             else: print("No ejecutado")
         
-        elif op==7: #keras
-            print("")
-            model = Sequential()
-            """"
-            model.add(Dense(200, input_dim=13, activation='relu'))
-            model.add(Dense(150, activation='relu'))
-            model.add(Dense(100, activation='relu'))
-            model.add(Dense(50, activation='tanh'))
-            model.add(Dense(1, activation='sigmoid'))
-            """
-            """
-            print("(1) - [4-tanh]-[2-tanh]-[10-softmax]")
-            print("(2) - [64-tanh]-[32-tanh]-[16-softmax]-[10-softmax]")
-            print("(3) - [64-tanh]-[32-tanh]-[16-softmax]-[10-sigmoid]")
-            print("(4) - [64-tanh]-[32-tanh]-[16-tanh]-[10-sigmoid]")
-            print("(5) - [64-tanh]-[32-tanh]-[16-tanh]-[10-softmax]")
-            print("(6) - [128-tanh]-[64-tanh]-[32-tanh]-[10-softmax]")
-            """
-            """
-            model.add(Dense(4, input_dim=13, activation='tanh'))
-            model.add(Dense(2, activation='tanh'))
-            model.add(Dense(1, activation='softmax'))
-            54.94505763053894 %
-            """
-            """
-            model.add(Dense(64, input_dim=13, activation='tanh'))
-            model.add(Dense(32, activation='tanh'))
-            model.add(Dense(16, activation='softmax'))
-            model.add(Dense(1, activation='softmax'))
-            Presición: 54.94505763053894 %
-            """
-            """
-            model.add(Dense(64, input_dim=13, activation='tanh'))
-            model.add(Dense(32, activation='tanh'))
-            model.add(Dense(16, activation='softmax'))
-            model.add(Dense(1, activation='sigmoid'))
-            Presición: 76.92307829856873 %
-            """
-            """
-            model.add(Dense(64, input_dim=13, activation='tanh'))
-            model.add(Dense(32, activation='tanh'))
-            model.add(Dense(16, activation='tanh'))
-            model.add(Dense(1, activation='sigmoid'))
-            Presición: 74.72527623176575 %
-            """
+        elif op==8: # keras 82.41% - establecida por defecto
+            print(colored("Keras con 3 capas densas:", "red"))
+            print(colored("Nodos: [30-tanh][20-tanh][1-sigmoid]", "red"))
+            print(colored("Optimizador [adam] | Loss [binary_crossentropy]", "red"))
+            print(colored("[Presición aprox: 82.41 %]", "red"))
+            ok = input("Pulsa enter para ejecutar (o escribe otra cosa para no ejecutarlo) >>> ")
+            if ok == '':
+                keras(X_train, X_test, Y_train, Y_test, 0,True,"Keras-3")
+            else: print("No ejecutado")
+            
+        elif op==9: #keras 85.71 %
+            print(colored("Keras con 4 capas densas:", "red"))
+            print(colored("Nodos: [50-sigmoid][10-sigmoid][200-tanh][1-sigmoid]", "red"))
+            print(colored("Optimizador [adam] | Loss [binary_crossentropy]", "red"))
+            print(colored("[Presición aprox: 85.71 %]", "red"))
+            ok = input("Pulsa enter para ejecutar (o escribe otra cosa para no ejecutarlo) >>> ")
+            if ok == '':
+                model = Sequential()
+                model.add(Dense(50, input_dim=13, activation='sigmoid'))
+                model.add(Dense(10, activation='sigmoid'))
+                model.add(Dense(200, activation='tanh'))
+                model.add(Dense(1, activation='sigmoid'))
+                model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['acc'])
 
-            """
-            model.add(Dense(64, input_dim=13, activation='tanh'))
-            model.add(Dense(32, activation='tanh'))
-            model.add(Dense(16, activation='tanh'))
-            model.add(Dense(1, activation='softmax'))
-            Presición: 54.94505763053894 %
-            """
+                keras(X_train, X_test, Y_train, Y_test, model, True,"Keras-3")
+            else: print("No ejecutado")
 
-            model = Sequential()
-            model.add(Dense(300, input_dim=13, activation='tanh'))
-            model.add(Dense(200, activation='tanh'))
-            model.add(Dense(1, activation='sigmoid'))
-            model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['acc'])
-
-            keras(X_train, X_test, Y_train, Y_test, model, True,"k7")
-
-        elif op==8: #Ejecutar todos 
+        elif op==11: #Ejecutar todos 
             print("")
             model = Sequential()
             model.add(Dense(50, input_dim=13, activation='sigmoid'))
@@ -280,15 +428,23 @@ def main():
 
             keras(X_train, X_test, Y_train, Y_test, model, True,"k8")
 
-        elif op==9: #Comparar graficas 
+        elif op==10: #Comparar graficas de historicos y de Matris de confusión
             print("")
+            compararModelosConfusion()
+            compararModelosHistoricos()
 
         elif op==0:
             print("Saliendo...")
             break
+           
+
+
         else:
             print (colored("La opción elegida no es correcta...\n","red"))
-
+        
+        #Debug
+        (historicos)
+        print(nombres)
 
 
 main()  

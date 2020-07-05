@@ -122,9 +122,10 @@ def plot_confusion_matrix(model, X, y):
 
     y_pred = model.predict_classes(X, verbose=0)
     plt.figure(figsize=(8, 6))
-    sns.heatmap(pd.DataFrame(confusion_matrix(y, y_pred)), annot=True, fmt='d',
+    conf =pd.DataFrame(confusion_matrix(y, y_pred))
+    sns.heatmap(conf, annot=True, fmt='d',
                 cmap='YlGnBu', alpha=0.8, vmin=0)
-
+    return conf
 
 def plot_compare_histories(history_list, name_list, plot_accuracy=True):
     dflist = []
