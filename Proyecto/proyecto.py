@@ -16,8 +16,8 @@ from keras.optimizers import Adam#########
 from keras.models import Sequential
 from keras.layers import Dense
 
-options = ["[0] - Salir", "[1] - Generar Gráficas de la muestra", "[2] - Mostrar información de la muestra", "[3] - Mostrar elementos de la muestra","[4] - Ejecución:[Manual]  Regresión Logistica" ,"[5] - Ejecución:[Sklearn] Regresión Logistica", "[6] - Ejecución:[Keras1]  [64-tanh][32-tanh][16-tanh][1-softmax]", "[7] - Ejecución:[Keras2]  [4-tanh][2-tanh][1-sigmoid]", "[8] - Ejecución:[Keras3]  [30-tanh][20-tanh][1-sigmoid]", "[9] - Ejecución:[Keras4]  [50-sigmoid][10-sigmoid][200-tanh][1-sigmoid] - ¡MEJOR!", "[10] - Ejecutar y comparar todas:[Graficas de Precisión y de Confusión]"]
-nombres =["Sklearns-RegresionLogistica", "Keras-basic"]
+options = ["[0] - Salir", "[1] - Generar Gráficas de la muestra", "[2] - Mostrar información de la muestra", "[3] - Mostrar elementos de la muestra","[4] - Ejecución:[Manual]  Regresión Logistica" ,"[5] - Ejecución:[Sklearn] Regresión Logistica", "[6] - Ejecución:[Keras1]  [64-tanh][32-tanh][16-tanh][1-softmax]", "[7] - Ejecución:[Keras2]  [4-tanh][2-tanh][1-sigmoid]", "[8] - Ejecución:[Keras3]  [30-tanh][20-tanh][1-sigmoid]", "[9] - Ejecución:[Keras4]  [50-sigmoid][10-sigmoid][200-tanh][1-sigmoid] - ¡MEJOR!", "[10]- Ejecución:[TODAS]   [Graficas de Precisión y de Confusión] - Comparar"]
+#nombres =["Sklearns-RegresionLogistica", "Keras-basic"]
 ejecuciones ={}
 confusiones ={}
 historicos ={}
@@ -117,6 +117,7 @@ def compararAciertos():
     plt.xlabel("Ejecuciones")
     sns.barplot(x=list(ejecuciones.keys()), y=list(ejecuciones.values()))
     plt.show()
+    plt.savefig('Compararcion-Aciertos.png')
 
 ###################Regresion logistica manual
 
@@ -249,14 +250,14 @@ def logistic_regression(x_train,y_train,x_test,y_test,learningRate,iteration, gr
     #y_prediction = predict(parameters["weight"],parameters["bias"],x_test)
     y_prediction = predict(parameters["weight"],x_test)
     conf =pd.DataFrame(confusion_matrix(y_test, y_prediction.T))
-    confusiones['Logic-regresion-manual'] = conf
+    confusiones['RegresiónLogica-Manual'] = conf
     if graf == True:
         plt.figure(figsize=(8, 6))
         sns.heatmap(conf, annot=True, fmt='d',cmap='YlGnBu', alpha=0.8, vmin=0)
         plt.show()
 
     acc =(100 - np.mean(np.abs(y_prediction - y_test))*100)
-    ejecuciones['Logic-regresion-manual'] = acc
+    ejecuciones['RegresiónLogica-Manual'] = acc
     print(colored("Precisión Test: " +str(acc)+" %", "blue"))
 
 ########################################################
@@ -266,6 +267,7 @@ def sklearnLogisticRegression(X_train, X_test, Y_train, Y_test, graf = True):
     model.fit(X_train,Y_train)
     acc = model.score(X_test,Y_test)*100
     ejecuciones['Sklearns-RegresionLogistica'] = acc
+    nombres.append('Sklearns-RegresionLogistica')
 
     y_pred = model.predict(X_test)
     conf =pd.DataFrame(confusion_matrix(Y_test, y_pred))
@@ -294,15 +296,17 @@ def keras(X_train, X_test, Y_train, Y_test, model = 0, graf = True, name='Keras-
     acc=score[1]*100
     ejecuciones[name] = acc
     #print(colored("Presición entrenamiento: " +str(history.history['acc'])+" %", "blue"))
-    print(colored("Presición test: " +str(acc)+" %", "blue"))
-    help.plot_loss_accuracy(history)
-    plt.savefig('history-'+name+'.png')
+    print(colored("["+name+"] Presición test: " +str(acc)+" %", "blue"))
     if graf == True:
+        help.plot_loss_accuracy(history)
+        plt.savefig('history-'+name+'.png')
         plt.show()
     confusiones[name] = help.plot_confusion_matrix(model, X_train, Y_train)
     plt.savefig('confusion_matrix-'+name+'.png')
     if graf == True:
         plt.show()
+    else: 
+        plt.close()
     
 def compararModelosConfusion():
     plt.figure(figsize=(24,12))
@@ -310,11 +314,13 @@ def compararModelosConfusion():
     plt.subplots_adjust(wspace = 0.4, hspace= 0.4)
 
     tam=len(confusiones)
-    for i in range(tam):
+    for i in range(tam-1):
         plt.subplot(2,3,i+1)
-        plt.title(nombres[i])
+        #plt.title(nombres[i])
+        plt.title(i)
         sns.heatmap(confusiones[nombres[i]],annot=True,cmap="Blues",fmt="d",cbar=False, annot_kws={"size": 24})
     plt.show()
+    plt.savefig('Compararcion-Confusion.png')
 
 
 def compararModelosHistoricos():
@@ -323,9 +329,11 @@ def compararModelosHistoricos():
     plt.subplots_adjust(wspace = 0.4, hspace= 0.4)
 
     tam=len(historicos)
-    for i in range(tam):
+    for i in range(tam-1):
         plt.subplot(2,3,i+1)
         #plt.title(nombres[i])
+        if nombres[i]=='Sklearns-RegresionLogistica':
+            i+=1
         
         historydf = pd.DataFrame(historicos[nombres[i]].history, index=historicos[nombres[i]].epoch)
         plt.plot(ylim=(0, max(1, historydf.values.max())))
@@ -334,8 +342,63 @@ def compararModelosHistoricos():
         acc = historicos[nombres[i]].history['acc'][-1]
         plt.title(nombres[i] +'- Loss: '+ str(loss)+', Accuracy: '+str(acc))
     plt.show()
- 
-    
+    plt.savefig('Compararcion-Historicos.png')
+
+######Funciones de ejecuciónd e distintos modos
+
+def logistic_regressionPlay(X_train, X_test, Y_train, Y_test, graf = True):
+    x_train = X_train.T
+    y_train = Y_train.T
+    x_test = X_test.T
+    y_test = Y_test.T
+    logistic_regression(x_train, y_train, x_test, y_test,1,100,graf) 
+
+def sklearnLogisticRegressionPlay(X_train, X_test, Y_train, Y_test, graf = True):
+    print(colored("[Presición aprox: 79.12 %]", "red"))
+    sklearnLogisticRegression(X_train, X_test, Y_train, Y_test, graf)
+
+
+def keras1Play(X_train, X_test, Y_train, Y_test, graf = True):
+    model = Sequential()
+    model.add(Dense(64, input_dim=13, activation='tanh'))
+    model.add(Dense(32, activation='tanh'))
+    model.add(Dense(16, activation='tanh'))
+    model.add(Dense(1, activation='softmax'))
+    model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['acc'])
+    keras(X_train, X_test, Y_train, Y_test, model, graf, "Keras-1")
+
+
+def keras2Play(X_train, X_test, Y_train, Y_test, graf = True):
+    model = Sequential()
+    model.add(Dense(4, input_dim=13, activation='tanh'))
+    model.add(Dense(2, activation='tanh'))
+    model.add(Dense(1, activation='sigmoid'))
+    model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['acc'])
+    keras(X_train, X_test, Y_train, Y_test, model, graf, "Keras-2")
+        
+def keras3Play(X_train, X_test, Y_train, Y_test, graf = True):
+    keras(X_train, X_test, Y_train, Y_test, 0,graf,"Keras-3")
+
+def keras4Play(X_train, X_test, Y_train, Y_test, graf = True):
+    model = Sequential()
+    model.add(Dense(50, input_dim=13, activation='sigmoid'))
+    model.add(Dense(10, activation='sigmoid'))
+    model.add(Dense(200, activation='tanh'))
+    model.add(Dense(1, activation='sigmoid'))
+    model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['acc'])
+    keras(X_train, X_test, Y_train, Y_test, model, graf,"Keras-4")
+
+
+def playAll(X_train, X_test, Y_train, Y_test, graf = False):
+    logistic_regressionPlay(X_train, X_test, Y_train, Y_test, graf)
+    sklearnLogisticRegressionPlay(X_train, X_test, Y_train, Y_test, graf)
+    keras1Play(X_train, X_test, Y_train, Y_test, graf)
+    keras2Play(X_train, X_test, Y_train, Y_test, graf)
+    keras3Play(X_train, X_test, Y_train, Y_test, graf)
+    keras4Play(X_train, X_test, Y_train, Y_test, graf)
+
+################################################
+
 
 def main():
     os.environ['KMP_WARNINGS'] = '0' #Desactiva logs de INFO de keras si se pone a 0 cuando no se usan
@@ -354,7 +417,6 @@ def main():
         elif op==2:
             print(data.describe())
             
-
         elif op==3:
             num= int(input("¿Cuantos elementos quieres recuperar? (1-303): "))
             if num <303 and num>1:
@@ -362,16 +424,10 @@ def main():
             else: print(colored("El número no es correcto", "red"))
 
         elif op==4: #Regresion lineal manual
-            x_train = X_train.T
-            y_train = Y_train.T
-            x_test = X_test.T
-            y_test = Y_test.T
-            logistic_regression(x_train, y_train, x_test, y_test,1,100)
+           logistic_regressionPlay(X_train, X_test, Y_train, Y_test, graf = True)
 
         elif op==5: #Sklearn
-            print("")
-            print(colored("[Presición aprox: 79.12 %]", "red"))
-            sklearnLogisticRegression(X_train, X_test, Y_train, Y_test)
+           sklearnLogisticRegressionPlay(X_train, X_test, Y_train, Y_test, graf = True)
         
         elif op==6: #Keras Basic -Presición: 54.95 %
             print(colored("Keras con 4 capas densas:", "red"))
@@ -380,13 +436,7 @@ def main():
             print(colored("[Presición aprox: 54.95 %]", "red"))
             ok = input("Pulsa enter para ejecutar (o escribe otra cosa para no ejecutarlo) >>> ")
             if ok == '':
-                model = Sequential()
-                model.add(Dense(64, input_dim=13, activation='tanh'))
-                model.add(Dense(32, activation='tanh'))
-                model.add(Dense(16, activation='tanh'))
-                model.add(Dense(1, activation='softmax'))
-                model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['acc'])
-                keras(X_train, X_test, Y_train, Y_test, model, True, "Keras-1")
+                keras1Play(X_train, X_test, Y_train, Y_test, graf = True)
             else: print("No ejecutado")
 
         elif op==7: #Keras Presición: 78.02 %
@@ -396,14 +446,9 @@ def main():
             print(colored("[Presición aprox: 78.02 %]", "red"))
             ok = input("Pulsa enter para ejecutar (o escribe otra cosa para no ejecutarlo) >>> ")
             if ok == '':
-                model = Sequential()
-                model.add(Dense(4, input_dim=13, activation='tanh'))
-                model.add(Dense(2, activation='tanh'))
-                model.add(Dense(1, activation='sigmoid'))
-                model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['acc'])
-                keras(X_train, X_test, Y_train, Y_test, model, True, "Keras-2")
+                keras2Play(X_train, X_test, Y_train, Y_test, graf = True)
             else: print("No ejecutado")
-        
+            
         elif op==8: # keras 82.41% - establecida por defecto
             print(colored("Keras con 3 capas densas:", "red"))
             print(colored("Nodos: [30-tanh][20-tanh][1-sigmoid]", "red"))
@@ -411,9 +456,9 @@ def main():
             print(colored("[Presición aprox: 82.41 %]", "red"))
             ok = input("Pulsa enter para ejecutar (o escribe otra cosa para no ejecutarlo) >>> ")
             if ok == '':
-                keras(X_train, X_test, Y_train, Y_test, 0,True,"Keras-3")
+                keras3Play(X_train, X_test, Y_train, Y_test, graf = True)
             else: print("No ejecutado")
-            
+                        
         elif op==9: #keras 85.71 %
             print(colored("Keras con 4 capas densas:", "red"))
             print(colored("Nodos: [50-sigmoid][10-sigmoid][200-tanh][1-sigmoid]", "red"))
@@ -421,36 +466,29 @@ def main():
             print(colored("[Presición aprox: 85.71 %]", "red"))
             ok = input("Pulsa enter para ejecutar (o escribe otra cosa para no ejecutarlo) >>> ")
             if ok == '':
-                model = Sequential()
-                model.add(Dense(50, input_dim=13, activation='sigmoid'))
-                model.add(Dense(10, activation='sigmoid'))
-                model.add(Dense(200, activation='tanh'))
-                model.add(Dense(1, activation='sigmoid'))
-                model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['acc'])
-
-                keras(X_train, X_test, Y_train, Y_test, model, True,"Keras-4")
+                keras4Play(X_train, X_test, Y_train, Y_test, graf = True)
             else: print("No ejecutado")
+            
        
         elif op==10: #Comparar graficas de historicos y de Matris de confusión
             print(colored("Se van a ejecutar todos los modelos, y a continuación se mostrará la comparación de gráficas", "red"))
             print(colored("[Grafica de Matriz de Confusión]", "red"))
-            print(colored("[Grafica de Presición bhistorica]", "red"))
+            print(colored("[Grafica de Presición Historica]", "red"))
+            print(colored("[Grafica de Presición]", "red"))
             ok = input("Pulsa enter para ejecutar (o escribe otra cosa para no ejecutarlo) >>> ")
             if ok == '':
-                
-
-
-
-
+                playAll(X_train, X_test, Y_train, Y_test, graf = False)
+                print(ejecuciones)
+                print(confusiones)
+                print(nombres)
+                compararModelosConfusion()
+                compararModelosHistoricos()
+                compararAciertos()
             else: print("No ejecutado")
-            compararModelosConfusion()
-            compararModelosHistoricos()
 
         elif op==0:
             print("Saliendo...")
             break
-           
-
 
         else:
             print (colored("La opción elegida no es correcta...\n","red"))
@@ -458,7 +496,6 @@ def main():
         #Debug
         (historicos)
         print(nombres)
-
 
 main()  
 ############
