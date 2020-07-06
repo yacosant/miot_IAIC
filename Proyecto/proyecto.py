@@ -61,14 +61,20 @@ def plot_confusion_matrix(model, X, y):
     return conf
 ###################################################
 
-def carga_csv(file_name):
-    return read_csv(file_name, header=None).values
-
 def cargar(num=0):
     if num==0:
         return pd.read_csv('dataset.csv')
     else:
         return pd.read_csv('dataset.csv',nrows=num) 
+
+def prepararData(data):
+    y = data.target.values
+    X_data = data.drop(['target'], axis = 1)
+    # Normalize
+    X_data = (X_data - np.min(X_data)) / (np.max(X_data) - np.min(X_data)).values
+
+    X_train, X_test, Y_train, Y_test = train_test_split(X_data, y, test_size = 0.30, stratify= data['target'], random_state = 5)
+    return X_train, X_test, Y_train, Y_test
 
 def menu():
     print(colored("==============================================", 'green'))
@@ -125,15 +131,6 @@ def pintar(data):
     countSex(data)
     countSexProblemas(data)
     countByEdad(data)
-
-def prepararData(data):
-    y = data.target.values
-    X_data = data.drop(['target'], axis = 1)
-    # Normalize
-    X_data = (X_data - np.min(X_data)) / (np.max(X_data) - np.min(X_data)).values
-
-    X_train, X_test, Y_train, Y_test = train_test_split(X_data, y, test_size = 0.30, stratify= data['target'], random_state = 5)
-    return X_train, X_test, Y_train, Y_test
 
 def compararAciertos():
     print(ejecuciones) #debug
@@ -297,7 +294,7 @@ def compararModelosHistoricos():
     plt.show()
     plt.savefig('Compararcion-Historicos.png')
 
-######Funciones de ejecuciónd e distintos modos
+######Funciones de ejecución de distintos modos
 
 def logistic_regressionPlay(X_train, X_test, Y_train, Y_test, graf = True):
     x_train = X_train.T
