@@ -12,12 +12,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import confusion_matrix
 from termcolor import colored
-from keras.optimizers import Adam#########
 from keras.models import Sequential
 from keras.layers import Dense
 
 options = ["[0] - Salir", "[1] - Generar Gráficas de la muestra", "[2] - Mostrar información de la muestra", "[3] - Mostrar elementos de la muestra","[4] - Ejecución:[Manual]  Regresión Logistica" ,"[5] - Ejecución:[Sklearn] Regresión Logistica", "[6] - Ejecución:[Keras1]  [64-tanh][32-tanh][16-tanh][1-softmax]", "[7] - Ejecución:[Keras2]  [4-tanh][2-tanh][1-sigmoid]", "[8] - Ejecución:[Keras3]  [30-tanh][20-tanh][1-sigmoid]", "[9] - Ejecución:[Keras4]  [50-sigmoid][10-sigmoid][200-tanh][1-sigmoid] - ¡MEJOR!", "[10]- Ejecución:[TODAS]   [Graficas de Precisión y de Confusión] - Comparar"]
-#nombres =["Sklearns-RegresionLogistica", "Keras-basic"]
 ejecuciones ={}
 confusiones ={}
 historicos ={}
@@ -35,7 +33,6 @@ def cargar(num=0):
 def menu():
     print(colored("==============================================", 'green'))
     print(colored("MENÚ:", 'green'))
-    #for op in options:
     i = 1
     while i < len(options):
         print(colored("\t"+options[i], 'green'))
@@ -95,17 +92,7 @@ def prepararData(data):
     # Normalize
     X_data = (X_data - np.min(X_data)) / (np.max(X_data) - np.min(X_data)).values
 
-
     X_train, X_test, Y_train, Y_test = train_test_split(X_data, y, test_size = 0.30, stratify= data['target'], random_state = 5)
-    """
-    print(X_train.shape)
-    print(X_test.shape)
-    print(Y_train.shape)
-    print(Y_test.shape)
-    print("---------")
-    #X_train=X_train.T
-    print(X_train.shape)
-    """
     return X_train, X_test, Y_train, Y_test
 
 def compararAciertos():
@@ -122,10 +109,7 @@ def compararAciertos():
 ###################Regresion logistica manual
 
 def initialize(dimension):
-    
-    weight = np.full((dimension,1),0.01)
-    #bias = 0.0
-    return weight#,bias
+    return np.full((dimension,1),0.01)
 
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
@@ -136,27 +120,9 @@ def forwardBackward(weight,x_train,y_train):
     y_head = sigmoid(np.dot(weight.T,x_train))
     loss = -(y_train*np.log(y_head) + (1-y_train)*np.log(1-y_head))
     cost = np.sum(loss) / x_train.shape[1]
-    
     # Backward
     derivative_weight = np.dot(x_train,((y_head-y_train).T))/x_train.shape[1]
-       
     return cost,derivative_weight
-
-    """
-def forwardBackward(weight,bias,x_train,y_train):
-    # Forward
-    
-    y_head = sigmoid(np.dot(weight.T,x_train) + bias)
-    loss = -(y_train*np.log(y_head) + (1-y_train)*np.log(1-y_head))
-    cost = np.sum(loss) / x_train.shape[1]
-    
-    # Backward
-    derivative_weight = np.dot(x_train,((y_head-y_train).T))/x_train.shape[1]
-    derivative_bias = np.sum(y_head-y_train)/x_train.shape[1]
-    gradients = {"Derivative Weight" : derivative_weight, "Derivative Bias" : derivative_bias}
-    
-    return cost,gradients
-    """
 
 
 def update(weight,x_train,y_train,learningRate,iteration) :
@@ -176,39 +142,6 @@ def update(weight,x_train,y_train,learningRate,iteration) :
     print("iteration:",iteration)
     print("cost:",cost)
 
-    """
-    plt.plot(index,costList)
-    plt.xlabel("Number of Iteration")
-    plt.ylabel("Cost")
-    plt.show()
-    """
-    return parameters, derivative_weight
-"""
-def update(weight,bias,x_train,y_train,learningRate,iteration) :
-    costList = []
-    index = []
-    
-    #for each iteration, update weight and bias values
-    for i in range(iteration):
-        cost,gradients = forwardBackward(weight,bias,x_train,y_train)
-        weight = weight - learningRate * gradients["Derivative Weight"]
-        bias = bias - learningRate * gradients["Derivative Bias"]
-        
-        costList.append(cost)
-        index.append(i)
-
-    parameters = {"weight": weight,"bias": bias}
-    
-    print("iteration:",iteration)
-    print("cost:",cost)
-
-    plt.plot(index,costList)
-    plt.xlabel("Number of Iteration")
-    plt.ylabel("Cost")
-    plt.show()
-
-    return parameters, gradients
-"""
 
 def predict(weight,x_test):
     z = np.dot(weight.T,x_test) 
@@ -223,31 +156,12 @@ def predict(weight,x_test):
             y_prediction[0,i] = 1
     return y_prediction
 
-"""
-def predict(weight,bias,x_test):
-    z = np.dot(weight.T,x_test) + bias
-    y_head = sigmoid(z)
-
-    y_prediction = np.zeros((1,x_test.shape[1]))
-    
-    for i in range(y_head.shape[1]):
-        if y_head[0,i] <= 0.5:
-            y_prediction[0,i] = 0
-        else:
-            y_prediction[0,i] = 1
-    return y_prediction
-"""
-
 
 def logistic_regression(x_train,y_train,x_test,y_test,learningRate,iteration, graf = True):
     dimension = x_train.shape[0]
-    #weight,bias = initialize(dimension)
     weight= initialize(dimension)
-    
-    #parameters, gradients = update(weight,bias,x_train,y_train,learningRate,iteration)
     parameters, derivative_weight = update(weight,x_train,y_train,learningRate,iteration)
 
-    #y_prediction = predict(parameters["weight"],parameters["bias"],x_test)
     y_prediction = predict(parameters["weight"],x_test)
     conf =pd.DataFrame(confusion_matrix(y_test, y_prediction.T))
     confusiones['RegresiónLogica-Manual'] = conf
@@ -258,7 +172,8 @@ def logistic_regression(x_train,y_train,x_test,y_test,learningRate,iteration, gr
 
     acc =(100 - np.mean(np.abs(y_prediction - y_test))*100)
     ejecuciones['RegresiónLogica-Manual'] = acc
-    print(colored("Precisión Test: " +str(acc)+" %", "blue"))
+    nombres.append('RegresiónLogica-Manual')
+    print(colored("[RegresiónLogica-Manual]Precisión Test: " +str(acc)+" %", "blue"))
 
 ########################################################
 
@@ -272,7 +187,7 @@ def sklearnLogisticRegression(X_train, X_test, Y_train, Y_test, graf = True):
     y_pred = model.predict(X_test)
     conf =pd.DataFrame(confusion_matrix(Y_test, y_pred))
     confusiones['Sklearns-RegresionLogistica'] = conf
-    print(colored("Precisión: " +str(acc)+" %", "blue"))
+    print(colored("[Sklearns-RegresionLogistica]Precisión Test: " +str(acc)+" %", "blue"))
     if graf == True:
         plt.figure(figsize=(8, 6))
         sns.heatmap(conf, annot=True, fmt='d',cmap='YlGnBu', alpha=0.8, vmin=0)
@@ -287,15 +202,12 @@ def keras(X_train, X_test, Y_train, Y_test, model = 0, graf = True, name='Keras-
         model.add(Dense(1, activation='sigmoid'))
         model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['acc'])
     
-    #history = model.fit(X_train, Y_train, epochs=200, verbose=2)
     history = model.fit(X_train, Y_train, validation_data=(X_test, Y_test), epochs=100, verbose=2)
     historicos[name]= history
     nombres.append(name)
-    #model.summary()
     score = model.evaluate(X_test, Y_test, verbose=0)
     acc=score[1]*100
     ejecuciones[name] = acc
-    #print(colored("Presición entrenamiento: " +str(history.history['acc'])+" %", "blue"))
     print(colored("["+name+"] Presición test: " +str(acc)+" %", "blue"))
     if graf == True:
         help.plot_loss_accuracy(history)
@@ -314,10 +226,10 @@ def compararModelosConfusion():
     plt.subplots_adjust(wspace = 0.4, hspace= 0.4)
 
     tam=len(confusiones)
-    for i in range(tam-1):
+    for i in range(tam):
         plt.subplot(2,3,i+1)
-        #plt.title(nombres[i])
-        plt.title(i)
+        plt.title(nombres[i])
+        #plt.title(i)
         sns.heatmap(confusiones[nombres[i]],annot=True,cmap="Blues",fmt="d",cbar=False, annot_kws={"size": 24})
     plt.show()
     plt.savefig('Compararcion-Confusion.png')
@@ -328,19 +240,21 @@ def compararModelosHistoricos():
     plt.suptitle("Comparación Historicos",fontsize=24)
     plt.subplots_adjust(wspace = 0.4, hspace= 0.4)
 
-    tam=len(historicos)
-    for i in range(tam-1):
-        plt.subplot(2,3,i+1)
-        #plt.title(nombres[i])
-        if nombres[i]=='Sklearns-RegresionLogistica':
-            i+=1
-        
-        historydf = pd.DataFrame(historicos[nombres[i]].history, index=historicos[nombres[i]].epoch)
-        plt.plot(ylim=(0, max(1, historydf.values.max())))
-        plt.plot(historydf)
-        loss = historicos[nombres[i]].history['loss'][-1]
-        acc = historicos[nombres[i]].history['acc'][-1]
-        plt.title(nombres[i] +'- Loss: '+ str(loss)+', Accuracy: '+str(acc))
+    tam=len(nombres)
+    i = 0
+    j = 0
+    while i < tam:
+        if nombres[i]!='Sklearns-RegresionLogistica' and nombres[i]!='RegresiónLogica-Manual':
+            j+=1
+            plt.subplot(2,2,j)                    
+            historydf = pd.DataFrame(historicos[nombres[i]].history, index=historicos[nombres[i]].epoch)
+            plt.plot(ylim=(0, max(1, historydf.values.max())))
+            plt.plot(historydf)
+            loss = historicos[nombres[i]].history['loss'][-1]
+            acc = historicos[nombres[i]].history['acc'][-1]
+            plt.title(nombres[i] +'- Loss: '+ str(loss)+', Accuracy: '+str(acc))
+
+        i += 1
     plt.show()
     plt.savefig('Compararcion-Historicos.png')
 
@@ -478,9 +392,6 @@ def main():
             ok = input("Pulsa enter para ejecutar (o escribe otra cosa para no ejecutarlo) >>> ")
             if ok == '':
                 playAll(X_train, X_test, Y_train, Y_test, graf = False)
-                print(ejecuciones)
-                print(confusiones)
-                print(nombres)
                 compararModelosConfusion()
                 compararModelosHistoricos()
                 compararAciertos()
@@ -493,56 +404,8 @@ def main():
         else:
             print (colored("La opción elegida no es correcta...\n","red"))
         
-        #Debug
-        (historicos)
-        print(nombres)
 
+
+############
 main()  
 ############
-#data = carga_csv('./dataset.csv')
-#print(data)
-data = cargar()
-#print(data.head(20))
-#print(data.count())#303 casos
-#pintar()
-
-#print(data.loc[data['age'] == 29])
-
-#print("Media de edad: " + str(data['age'].mean()))
-
-X_train, X_test, Y_train, Y_test= prepararData(data)
-
-"""
-print(Input_train['target'].mean())
-print(Input_test['target'].mean())
-
-OUT:
--sin stratify
-0.5518867924528302
-0.5274725274725275
--con stratify
-0.5424528301886793
-0.5494505494505495
-"""
-
-#sklearnLogisticRegression(X_train, X_test, Y_train, Y_test)
-
-ejecuciones['Prueba']=95
-
-keras(X_train, X_test, Y_train, Y_test)
-compararAciertos()
-
-
-"""
-    Model Accuracy =  0.7362637519836426 SIN NORMALIZAR
-    Model Accuracy =  0.8351648449897766 NORMALIZADO
-"""
-
-
-"""
-class Producto:
-    def __init__(self, nombre, precio):
-        self.nombre = nombre
-        self.precio = precio
-
-"""
