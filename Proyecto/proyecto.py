@@ -1,5 +1,5 @@
 import numpy as np
-import helper as help
+#import helper as help
 import copy
 import pandas as pd
 from pandas.io.parsers import read_csv
@@ -20,6 +20,46 @@ ejecuciones ={}
 confusiones ={}
 historicos ={}
 nombres = []
+
+###################################################
+#Funciones sacadas del archivo helper.py proporcionado por el profesor
+
+def plot_loss_accuracy(history):
+    """
+    Genera una figura con la evolución del coste y la precisión durante
+    el entrenamiento de un modelo en Keras. 
+
+    Argumentos:
+    history -- un objeto History devuelto por el método fit de Keras
+    https://keras.io/models/model/#fit
+    """
+
+    historydf = pd.DataFrame(history.history, index=history.epoch)
+    plt.figure(figsize=(8, 6))
+    historydf.plot(ylim=(0, max(1, historydf.values.max())))
+    loss = history.history['loss'][-1]
+    acc = history.history['acc'][-1]
+    plt.title('Loss: %.3f, Accuracy: %.3f' % (loss, acc))
+    plt.close(1)
+
+def plot_confusion_matrix(model, X, y):
+    """
+    Genera una figura con un mapa de calor que representa la matriz
+    de confusión del modelo 'model' aplicado sobre los datos X comparado
+    con las etiquetas de y
+
+    Argumentos:
+    model -- modelo de Keras
+    X, y -- datos y etiquetas
+    """
+
+    y_pred = model.predict_classes(X, verbose=0)
+    plt.figure(figsize=(8, 6))
+    conf =pd.DataFrame(confusion_matrix(y, y_pred))
+    sns.heatmap(conf, annot=True, fmt='d',
+                cmap='YlGnBu', alpha=0.8, vmin=0)
+    return conf
+###################################################
 
 def carga_csv(file_name):
     return read_csv(file_name, header=None).values
@@ -137,10 +177,9 @@ def update(weight,x_train,y_train,learningRate,iteration) :
         costList.append(cost)
         index.append(i)
 
-    parameters = {"weight": weight}
-    
     print("iteration:",iteration)
     print("cost:",cost)
+    return weight
 
 
 def predict(weight,x_test):
@@ -160,9 +199,9 @@ def predict(weight,x_test):
 def logistic_regression(x_train,y_train,x_test,y_test,learningRate,iteration, graf = True):
     dimension = x_train.shape[0]
     weight= initialize(dimension)
-    parameters, derivative_weight = update(weight,x_train,y_train,learningRate,iteration)
+    weightNuevo = update(weight,x_train,y_train,learningRate,iteration)
 
-    y_prediction = predict(parameters["weight"],x_test)
+    y_prediction = predict(weightNuevo,x_test)
     conf =pd.DataFrame(confusion_matrix(y_test, y_prediction.T))
     confusiones['RegresiónLogica-Manual'] = conf
     if graf == True:
@@ -210,10 +249,10 @@ def keras(X_train, X_test, Y_train, Y_test, model = 0, graf = True, name='Keras-
     ejecuciones[name] = acc
     print(colored("["+name+"] Presición test: " +str(acc)+" %", "blue"))
     if graf == True:
-        help.plot_loss_accuracy(history)
+        plot_loss_accuracy(history)
         plt.savefig('history-'+name+'.png')
         plt.show()
-    confusiones[name] = help.plot_confusion_matrix(model, X_train, Y_train)
+    confusiones[name] = plot_confusion_matrix(model, X_train, Y_train)
     plt.savefig('confusion_matrix-'+name+'.png')
     if graf == True:
         plt.show()
