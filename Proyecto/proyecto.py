@@ -26,7 +26,7 @@ nombres = []
 
 def plot_loss_accuracy(history):
     """
-    Genera una figura con la evolución del coste y la precisión durante
+    Genera una figura con la evolución del coste y la Precisión durante
     el entrenamiento de un modelo en Keras. 
 
     Argumentos:
@@ -227,6 +227,7 @@ def sklearnLogisticRegression(X_train, X_test, Y_train, Y_test, graf = True):
     if graf == True:
         plt.figure(figsize=(8, 6))
         sns.heatmap(conf, annot=True, fmt='d',cmap='YlGnBu', alpha=0.8, vmin=0)
+        plt.savefig('confusion_matrix-Sklearns-RegresionLogistica.png')
         plt.show()
     
 
@@ -303,10 +304,6 @@ def logistic_regressionPlay(X_train, X_test, Y_train, Y_test, graf = True):
     y_test = Y_test.T
     logistic_regression(x_train, y_train, x_test, y_test,1,100,graf) 
 
-def sklearnLogisticRegressionPlay(X_train, X_test, Y_train, Y_test, graf = True):
-    print(colored("[Presición aprox: 79.12 %]", "red"))
-    sklearnLogisticRegression(X_train, X_test, Y_train, Y_test, graf)
-
 
 def keras1Play(X_train, X_test, Y_train, Y_test, graf = True):
     model = Sequential()
@@ -341,7 +338,7 @@ def keras4Play(X_train, X_test, Y_train, Y_test, graf = True):
 
 def playAll(X_train, X_test, Y_train, Y_test, graf = False):
     logistic_regressionPlay(X_train, X_test, Y_train, Y_test, graf)
-    sklearnLogisticRegressionPlay(X_train, X_test, Y_train, Y_test, graf)
+    sklearnLogisticRegression(X_train, X_test, Y_train, Y_test, graf)
     keras1Play(X_train, X_test, Y_train, Y_test, graf)
     keras2Play(X_train, X_test, Y_train, Y_test, graf)
     keras3Play(X_train, X_test, Y_train, Y_test, graf)
@@ -374,10 +371,11 @@ def main():
             else: print(colored("El número no es correcto", "red"))
 
         elif op==4: #Regresion lineal manual
-           logistic_regressionPlay(X_train, X_test, Y_train, Y_test, graf = True)
+            logistic_regressionPlay(X_train, X_test, Y_train, Y_test, graf = True)
 
         elif op==5: #Sklearn
-           sklearnLogisticRegressionPlay(X_train, X_test, Y_train, Y_test, graf = True)
+            print(colored("[Presición aprox: 79.12 %]", "red"))
+            sklearnLogisticRegression(X_train, X_test, Y_train, Y_test, graf = True)
         
         elif op==6: #Keras Basic -Presición: 54.95 %
             print(colored("Keras con 4 capas densas:", "red"))
